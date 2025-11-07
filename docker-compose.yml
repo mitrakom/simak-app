@@ -1,0 +1,52 @@
+services:
+  # 1. Layanan PHP-FPM (Aplikasi)
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+      args:
+        - PHP_FPM_PORT=${DOCKER_APP_PORT:-9100}
+    container_name: ${DOCKER_CONTAINER_PREFIX:-simak_laravel}_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    network_mode: host  # Gunakan network host seperti Moodle agar bisa akses DB OS
+    volumes:
+      - .:/var/www/html # Sinkronisasi kode
+    environment:
+      - PHP_FPM_PORT=${DOCKER_APP_PORT:-9100}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'  # Batasi 1 Core CPU
+          memory: 1G   # Batasi 1GB RAM
+
+  # 2. Layanan Nginx (Web Server)
+  web:
+    image: nginx:alpine
+    container_name: ${DOCKER_CONTAINER_PREFIX:-simak_laravel}_web
+    restart: unless-stopped
+    network_mode: host  # Gunakan network host
+    volumes:
+      - .:/var/www/html
+      - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf.template
+    environment:
+      - NGINX_PORT=${DOCKER_WEB_PORT:-8910}
+      - PHP_FPM_PORT=${DOCKER_APP_PORT:-9100}
+    command: /bin/sh -c "envsubst '$$NGINX_PORT $$PHP_FPM_PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    depends_on:
+      - app
+
+  # 3. Layanan Node (Untuk Frontend)
+  node:
+    image: node:18-alpine
+    container_name: ${DOCKER_CONTAINER_PREFIX:-simak_laravel}_node
+    working_dir: /var/www/html
+    tty: true
+    network_mode: host  # Gunakan network host
+    volumes:
+      - .:/var/www/html
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'  # Batasi 1 Core CPU
+          memory: 1.5G   # Batasi 1.5GB RAM
