@@ -67,7 +67,7 @@ class InstitusiController extends Controller
     {
         $institusi = Institusi::where('slug', $slug)->first();
 
-        if (!$institusi) {
+        if (! $institusi) {
             return response()->json([
                 'message' => 'Kode institusi tidak ditemukan.',
                 'valid' => false,

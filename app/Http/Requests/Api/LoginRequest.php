@@ -55,7 +55,7 @@ class LoginRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            if (!$validator->errors()->has('email') && !$validator->errors()->has('slug')) {
+            if (! $validator->errors()->has('email') && ! $validator->errors()->has('slug')) {
                 $this->validateUserInstitusiSlug($validator);
             }
         });

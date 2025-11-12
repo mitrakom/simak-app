@@ -22,31 +22,31 @@ class EnsureUserHasInstitusi
         $user = $request->user();
 
         // Pastikan user sudah terautentikasi
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'message' => 'Unauthenticated',
-                'error' => 'User must be authenticated'
+                'error' => 'User must be authenticated',
             ], 401);
         }
 
         // Pastikan user memiliki institusi_id
-        if (!$user->institusi_id) {
+        if (! $user->institusi_id) {
             return response()->json([
                 'message' => 'Forbidden - No Institusi',
-                'error' => 'User must be associated with an institusi'
+                'error' => 'User must be associated with an institusi',
             ], 403);
         }
 
         // Load relasi institusi jika belum dimuat
-        if (!$user->relationLoaded('institusi')) {
+        if (! $user->relationLoaded('institusi')) {
             $user->load('institusi');
         }
 
         // Pastikan institusi exists
-        if (!$user->institusi) {
+        if (! $user->institusi) {
             return response()->json([
                 'message' => 'Forbidden - Institusi Not Found',
-                'error' => 'User institusi not found in database'
+                'error' => 'User institusi not found in database',
             ], 403);
         }
 

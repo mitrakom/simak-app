@@ -10,51 +10,33 @@ use Illuminate\Support\Facades\Log;
 trait TracksBatchProgress
 {
     /**
-     * Update batch progress after job completes
-     * Call this method at the end of handle() in record sync jobs
+     * SIMPLIFIED: Just mark as processing (no real-time tracking to avoid race conditions)
+     * Final stats will be calculated from Laravel Batch when it finishes
      */
-    public function updateBatchProgress(string $batchId, bool $success = true, string $errorMessage = null): void
+    public function updateBatchProgress(string $batchId, bool $success = true, ?string $errorMessage = null): void
     {
         try {
-            Log::debug('TracksBatchProgress: Attempting to update progress', [
-                'batch_id' => $batchId,
-                'success' => $success,
-                'error_message' => $errorMessage
-            ]);
-
             $batchProgress = SyncBatchProgress::where('batch_id', $batchId)->first();
 
-            if (!$batchProgress) {
+            if (! $batchProgress) {
                 Log::warning('Batch progress record not found', ['batch_id' => $batchId]);
+
                 return;
             }
 
-            // Mark as processing if not already
+            // Only mark as processing if not already (no concurrent updates issue here)
             if ($batchProgress->status === 'pending') {
-                $batchProgress->markProcessing();
+                $batchProgress->update([
+                    'status' => 'processing',
+                    'started_at' => now(),
+                ]);
             }
 
-            // Increment processed records
-            $processed = $batchProgress->processed_records + 1;
-            $failed = $batchProgress->failed_records;
-
-            if (!$success) {
-                $failed++;
-            }
-
-            $batchProgress->updateProgress($processed, $failed);
-
-            Log::debug('Batch progress updated successfully', [
-                'batch_id' => $batchId,
-                'processed' => $processed,
-                'total' => $batchProgress->total_records,
-                'percentage' => $batchProgress->progress_percentage
-            ]);
+            // No more per-job tracking! Progress will be read from Laravel Batch directly
         } catch (\Exception $e) {
-            Log::error('Failed to update batch progress', [
+            Log::error('Failed to update batch status', [
                 'batch_id' => $batchId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
         }
     }

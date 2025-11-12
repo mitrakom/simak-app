@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\BroadcastTestController;
 use App\Http\Controllers\Api\InstitusiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,11 +16,12 @@ Route::prefix('broadcast-test')->group(function () {
 
 // Simple test route untuk broadcast
 Route::get('/test-broadcast/{institusiId}', function (int $institusiId) {
-    event(new \App\Events\SyncProgressUpdated(75, 'Testing broadcast message', 'test-' . time(), $institusiId));
+    event(new \App\Events\SyncProgressUpdated(75, 'Testing broadcast message', 'test-'.time(), $institusiId));
+
     return response()->json([
         'message' => 'Broadcast test sent successfully',
         'institusi_id' => $institusiId,
-        'timestamp' => now()->toISOString()
+        'timestamp' => now()->toISOString(),
     ]);
 });
 
@@ -37,7 +37,6 @@ Route::get('/test-broadcast/{institusiId}', function (int $institusiId) {
 */
 
 // Route::get('/test', [\App\Http\Controllers\Api\TestController::class, 'index'])->name('connection');
-
 
 // Test routes untuk FeederClient - Protected by feeder.ready middleware
 Route::prefix('test')->name('test.')->middleware(['auth:sanctum', 'feeder.ready'])->group(function () {

@@ -7,9 +7,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 class ApiResponseMiddleware
 {
@@ -25,7 +23,7 @@ class ApiResponseMiddleware
 
         if ($request->is('api/*')) {
             // Ensure JSON response for API routes
-            if (!$response instanceof JsonResponse && $response->getStatusCode() >= 400) {
+            if (! $response instanceof JsonResponse && $response->getStatusCode() >= 400) {
                 return response()->json([
                     'message' => 'An error occurred',
                     'status' => $response->getStatusCode(),

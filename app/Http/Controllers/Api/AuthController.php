@@ -66,7 +66,7 @@ class AuthController extends Controller
         $slug = $validated['slug'];
         unset($validated['slug']); // Remove slug from credentials
 
-        if (!Auth::attempt($validated)) {
+        if (! Auth::attempt($validated)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -75,7 +75,7 @@ class AuthController extends Controller
         $user = User::with('institusi')->where('email', $validated['email'])->first();
 
         // Double-check slug validation (already validated in request, but extra security)
-        if (!$user->institusi || $user->institusi->slug !== $slug) {
+        if (! $user->institusi || $user->institusi->slug !== $slug) {
             Auth::logout();
             throw ValidationException::withMessages([
                 'slug' => ['Your account is not associated with this institution.'],
@@ -171,7 +171,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
-        if (!$user) {
+        if (! $user) {
             // Don't reveal if email exists or not for security
             return response()->json([
                 'message' => 'If your email is registered, you will receive a password reset link.',
@@ -210,14 +210,14 @@ class AuthController extends Controller
             ->where('email', $validated['email'])
             ->first();
 
-        if (!$resetRecord) {
+        if (! $resetRecord) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid reset token or email.'],
             ]);
         }
 
         // Check if token matches and is not expired (24 hours)
-        if (!Hash::check($validated['token'], $resetRecord->token)) {
+        if (! Hash::check($validated['token'], $resetRecord->token)) {
             throw ValidationException::withMessages([
                 'token' => ['Invalid reset token.'],
             ]);
@@ -237,7 +237,7 @@ class AuthController extends Controller
         // Update user password
         $user = User::where('email', $validated['email'])->first();
 
-        if (!$user) {
+        if (! $user) {
             throw ValidationException::withMessages([
                 'email' => ['User not found.'],
             ]);

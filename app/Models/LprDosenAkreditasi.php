@@ -86,6 +86,7 @@ class LprDosenAkreditasi extends Model
         } elseif ($this->pendidikan_s1_tahun_lulus) {
             return 'S1';
         }
+
         return 'Tidak Diketahui';
     }
 
@@ -94,7 +95,7 @@ class LprDosenAkreditasi extends Model
      */
     public function hasFunctionalPositionAttribute(): bool
     {
-        return !empty($this->jabatan_fungsional_saat_ini);
+        return ! empty($this->jabatan_fungsional_saat_ini);
     }
 
     /**
@@ -102,6 +103,6 @@ class LprDosenAkreditasi extends Model
      */
     public function isCertifiedAttribute(): bool
     {
-        return $this->sudah_sertifikasi_dosen && !empty($this->tahun_sertifikasi_dosen);
+        return $this->sudah_sertifikasi_dosen && ! empty($this->tahun_sertifikasi_dosen);
     }
 }

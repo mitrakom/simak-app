@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\SyncProdiJob;
-use App\Jobs\SyncDosenJob;
-use App\Jobs\SyncMahasiswaJob;
 use App\Jobs\SyncAkademikMahasiswaJob;
+use App\Jobs\SyncAktivitasMahasiswaJob;
 use App\Jobs\SyncBimbinganTaJob;
 use App\Jobs\SyncDosenAkreditasiJob;
+use App\Jobs\SyncDosenJob;
 use App\Jobs\SyncLulusanJob;
+use App\Jobs\SyncMahasiswaJob;
 use App\Jobs\SyncPrestasiMahasiswaJob;
-use App\Jobs\SyncAktivitasMahasiswaJob;
+use App\Jobs\SyncProdiJob;
 use App\Models\Institusi;
 use App\Models\SyncStatus;
 use Illuminate\Http\JsonResponse;
@@ -32,11 +32,11 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'user_has_no_institusi'
+                    'error' => 'user_has_no_institusi',
                 ], 422);
             }
 
@@ -72,14 +72,14 @@ class SyncController extends Controller
                     'error_count' => $errorCount,
                     'pending_count' => $pendingCount,
                     'syncing_count' => $syncingCount,
-                    'success_count' => collect($syncStatuses)->where('status', 'tersinkronisasi')->count()
-                ]
+                    'success_count' => collect($syncStatuses)->where('status', 'tersinkronisasi')->count(),
+                ],
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengambil status sinkronisasi',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -94,11 +94,11 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'user_has_no_institusi'
+                    'error' => 'user_has_no_institusi',
                 ], 422);
             }
 
@@ -113,22 +113,22 @@ class SyncController extends Controller
                 'bimbingan_ta',
                 'lulusan',
                 'aktivitas_mahasiswa',
-                'dosen_akreditasi'
+                'dosen_akreditasi',
             ];
 
-            if (!in_array($syncType, $validSyncTypes)) {
+            if (! in_array($syncType, $validSyncTypes)) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Sync type tidak valid',
                     'error' => 'invalid_sync_type',
-                    'valid_types' => $validSyncTypes
+                    'valid_types' => $validSyncTypes,
                 ], 422);
             }
 
             // Get last status untuk sync type ini
             $status = SyncStatus::getLastStatusBySyncType($institusi->id, $syncType);
 
-            if (!$status) {
+            if (! $status) {
                 return response()->json([
                     'status' => 'success',
                     'data' => [
@@ -141,20 +141,20 @@ class SyncController extends Controller
                         'current_progress' => 0,
                         'progress_message' => null,
                         'error_message' => null,
-                        'sync_process_id' => null
-                    ]
+                        'sync_process_id' => null,
+                    ],
                 ], 200);
             }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $status
+                'data' => $status,
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengambil status sinkronisasi',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -174,7 +174,7 @@ class SyncController extends Controller
             'bimbingan_ta' => 'Bimbingan TA',
             'lulusan' => 'Data Lulusan',
             'aktivitas_mahasiswa' => 'Aktivitas Mahasiswa',
-            'dosen_akreditasi' => 'Dosen Akreditasi'
+            'dosen_akreditasi' => 'Dosen Akreditasi',
         ];
 
         return $labels[$syncType] ?? $syncType;
@@ -195,7 +195,7 @@ class SyncController extends Controller
             'bimbingan_ta' => '📚',
             'lulusan' => '👔',
             'aktivitas_mahasiswa' => '📋',
-            'dosen_akreditasi' => '🔍'
+            'dosen_akreditasi' => '🔍',
         ];
 
         return $icons[$syncType] ?? '📌';
@@ -210,10 +210,10 @@ class SyncController extends Controller
             $user = Auth::user();
 
             // Double check: user must have institusi (should be caught by middleware)
-            if (!$user->institusi_id || !$user->institusi) {
+            if (! $user->institusi_id || ! $user->institusi) {
                 return response()->json([
                     'message' => 'Forbidden',
-                    'error' => 'User tidak memiliki institusi yang valid'
+                    'error' => 'User tidak memiliki institusi yang valid',
                 ], 403);
             }
 
@@ -228,13 +228,13 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
-                ]
+                    'nama' => $institusi->nama,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync prodi job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -248,10 +248,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -263,7 +263,7 @@ class SyncController extends Controller
             ) {
                 return response()->json([
                     'message' => 'Konfigurasi Feeder tidak lengkap',
-                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)'
+                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)',
                 ], 422);
             }
 
@@ -280,25 +280,25 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
                 'info' => 'Job akan memproses data dosen dari API Feeder dan menyimpannya ke database. Gunakan sync_process_id untuk monitoring progress via WebSocket.',
                 'websocket_channels' => [
                     'private-sync-process.' . $syncProcessId,
-                    'private-institusi-sync.' . $institusi->id
-                ]
+                    'private-institusi-sync.' . $institusi->id,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Gagal menqueue sync dosen job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Sync mahasiswa data untuk institusi user yang sedang login
-     * 
+     *
      * Request parameters:
      * - angkatan (optional): Filter mahasiswa by angkatan (e.g., "2024", "2023")
      * - fetch_biodata (optional): Boolean to enable fetching biodata details (default: false)
@@ -309,10 +309,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -324,14 +324,14 @@ class SyncController extends Controller
             ) {
                 return response()->json([
                     'message' => 'Konfigurasi Feeder tidak lengkap',
-                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)'
+                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)',
                 ], 422);
             }
 
             // Validate request parameters
             $validated = $request->validate([
                 'angkatan' => 'nullable|string|regex:/^\d{4}(-\d{4})?$/', // Supports '2024' or '2020-2024'
-                'fetch_biodata' => 'nullable|boolean'
+                'fetch_biodata' => 'nullable|boolean',
             ]);
 
             $angkatan = $validated['angkatan'] ?? null;
@@ -365,34 +365,34 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
                 'parameters' => [
                     'angkatan' => $angkatan,
-                    'fetch_biodata' => $fetchBiodata
+                    'fetch_biodata' => $fetchBiodata,
                 ],
                 'info' => $responseInfo,
                 'websocket_channels' => [
                     'private-sync-process.' . $syncProcessId,
-                    'private-institusi-sync.' . $institusi->id
-                ]
+                    'private-institusi-sync.' . $institusi->id,
+                ],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Validasi parameter gagal',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Gagal menqueue sync mahasiswa job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Sync akademik mahasiswa (IPS, IPK, SKS) untuk institusi user yang sedang login
-     * 
+     *
      * Request parameters:
      * - angkatan (optional): Filter by angkatan (e.g., "2024", "2023")
      */
@@ -402,10 +402,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -417,49 +417,53 @@ class SyncController extends Controller
             ) {
                 return response()->json([
                     'message' => 'Konfigurasi Feeder tidak lengkap',
-                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)'
+                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)',
                 ], 422);
             }
 
             // Validate request parameters
             $validated = $request->validate([
-                'angkatan' => 'nullable|string|regex:/^\d{4}$/',
+                'semester' => 'nullable|string|regex:/^\d{5}$/', // Format: 20241 (tahun+semester)
             ]);
 
-            $angkatan = $validated['angkatan'] ?? null;
+            $semester = $validated['semester'] ?? null;
 
-            // Dispatch job untuk sync akademik mahasiswa
-            SyncAkademikMahasiswaJob::dispatch($institusi, $angkatan);
+            // Generate unique sync process ID
+            $syncProcessId = uniqid('sync_akademik_mahasiswa_' . $institusi->id . '_', true);
+
+            // Dispatch job untuk sync akademik mahasiswa (pass institusiId, not model)
+            SyncAkademikMahasiswaJob::dispatch($institusi->id, $syncProcessId, $semester);
 
             $responseMessage = 'Sync akademik mahasiswa job telah diqueue dengan sukses';
             $responseInfo = 'Job akan memproses riwayat akademik mahasiswa (IPS, IPK, SKS) per semester dari API Feeder';
 
-            if ($angkatan) {
-                $responseInfo .= " (filter angkatan: {$angkatan})";
+            if ($semester) {
+                $responseInfo .= " (filter semester: {$semester})";
             }
 
             return response()->json([
                 'message' => $responseMessage,
+                'sync_process_id' => $syncProcessId,
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
                 'parameters' => [
-                    'angkatan' => $angkatan,
+                    'semester' => $semester,
                 ],
                 'info' => $responseInfo,
-                'note' => 'Data mahasiswa harus sudah disinkronkan terlebih dahulu sebelum sync akademik'
+                'note' => 'Data mahasiswa harus sudah disinkronkan terlebih dahulu sebelum sync akademik',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Validasi parameter gagal',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Gagal menqueue sync akademik mahasiswa job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -473,10 +477,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -488,7 +492,7 @@ class SyncController extends Controller
             ) {
                 return response()->json([
                     'message' => 'Konfigurasi Feeder tidak lengkap',
-                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)'
+                    'error' => 'Institusi harus memiliki konfigurasi feeder yang lengkap (URL, username, password)',
                 ], 422);
             }
 
@@ -500,14 +504,14 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
-                'info' => 'Job akan memproses data bimbingan TA (tugas akhir) dari API Feeder'
+                'info' => 'Job akan memproses data bimbingan TA (tugas akhir) dari API Feeder',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Gagal menqueue sync bimbingan TA job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -526,7 +530,7 @@ class SyncController extends Controller
             if ($user->institusi_id) {
                 return response()->json([
                     'message' => 'Forbidden',
-                    'error' => 'Only super admin can sync all institusi'
+                    'error' => 'Only super admin can sync all institusi',
                 ], 403);
             }
 
@@ -543,12 +547,12 @@ class SyncController extends Controller
 
             return response()->json([
                 'message' => 'Sync prodi jobs have been queued for all institusi',
-                'total_institusi' => $queuedCount
+                'total_institusi' => $queuedCount,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync prodi jobs',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -566,7 +570,7 @@ class SyncController extends Controller
             if ($user->institusi->slug !== $slug) {
                 return response()->json([
                     'message' => 'Forbidden',
-                    'error' => 'You can only sync data for your own institusi'
+                    'error' => 'You can only sync data for your own institusi',
                 ], 403);
             }
 
@@ -580,7 +584,7 @@ class SyncController extends Controller
             ) {
                 return response()->json([
                     'message' => 'Feeder configuration incomplete',
-                    'error' => 'Institusi must have complete feeder configuration'
+                    'error' => 'Institusi must have complete feeder configuration',
                 ], 422);
             }
 
@@ -592,13 +596,13 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
-                ]
+                    'nama' => $institusi->nama,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync prodi job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -612,10 +616,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -627,7 +631,7 @@ class SyncController extends Controller
             ) {
                 return response()->json([
                     'message' => 'Feeder configuration incomplete',
-                    'error' => 'Institusi must have complete feeder configuration'
+                    'error' => 'Institusi must have complete feeder configuration',
                 ], 422);
             }
 
@@ -639,14 +643,14 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
-                'info' => 'Job akan memproses data riwayat pendidikan, jabatan fungsional, dan sertifikasi dosen untuk laporan akreditasi'
+                'info' => 'Job akan memproses data riwayat pendidikan, jabatan fungsional, dan sertifikasi dosen untuk laporan akreditasi',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync dosen akreditasi job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -660,18 +664,18 @@ class SyncController extends Controller
             $user = $request->user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak terkait dengan institusi',
-                    'error' => 'User must be associated with an institusi'
+                    'error' => 'User must be associated with an institusi',
                 ], 422);
             }
 
             // Validasi konfigurasi feeder
-            if (!$institusi->feeder_url || !$institusi->feeder_username || !$institusi->feeder_password) {
+            if (! $institusi->feeder_url || ! $institusi->feeder_username || ! $institusi->feeder_password) {
                 return response()->json([
                     'message' => 'Feeder configuration incomplete',
-                    'error' => 'Institusi must have complete feeder configuration'
+                    'error' => 'Institusi must have complete feeder configuration',
                 ], 422);
             }
 
@@ -682,7 +686,7 @@ class SyncController extends Controller
                 'start_offset' => 'sometimes|integer|min:0',
                 'angkatan_start' => 'sometimes|integer|min:1900|max:2100',
                 'angkatan_end' => 'sometimes|integer|min:1900|max:2100|gte:angkatan_start',
-                'tahun_keluar' => 'sometimes|integer|min:1900|max:2100'
+                'tahun_keluar' => 'sometimes|integer|min:1900|max:2100',
             ]);
 
             $batchSize = $validatedData['batch_size'] ?? 100;
@@ -700,7 +704,7 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
                 'parameters' => [
                     'batch_size' => $batchSize,
@@ -708,14 +712,14 @@ class SyncController extends Controller
                     'start_offset' => $startOffset,
                     'angkatan_start' => $angkatanStart,
                     'angkatan_end' => $angkatanEnd,
-                    'tahun_keluar' => $tahunKeluar
+                    'tahun_keluar' => $tahunKeluar,
                 ],
-                'info' => 'Job akan memproses data mahasiswa lulus/DO untuk laporan dan analisis lulusan'
+                'info' => 'Job akan memproses data mahasiswa lulus/DO untuk laporan dan analisis lulusan',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync lulusan job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -729,10 +733,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -763,20 +767,20 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
                 'parameters' => [
                     'tahun_prestasi' => $tahunPrestasi,
                     'batch_size' => $batchSize,
                     'max_records' => $maxRecords,
-                    'start_offset' => $startOffset
+                    'start_offset' => $startOffset,
                 ],
-                'info' => 'Job akan memproses data prestasi mahasiswa dari Feeder'
+                'info' => 'Job akan memproses data prestasi mahasiswa dari Feeder',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync prestasi mahasiswa job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -790,10 +794,10 @@ class SyncController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'User tidak memiliki institusi',
-                    'error' => 'User must have an associated institusi'
+                    'error' => 'User must have an associated institusi',
                 ], 422);
             }
 
@@ -818,18 +822,18 @@ class SyncController extends Controller
                 'institusi' => [
                     'id' => $institusi->id,
                     'slug' => $institusi->slug,
-                    'nama' => $institusi->nama
+                    'nama' => $institusi->nama,
                 ],
                 'parameters' => [
                     'semester_start' => $semesterStart,
-                    'semester_end' => $semesterEnd
+                    'semester_end' => $semesterEnd,
                 ],
-                'info' => 'Job akan memproses data aktivitas mahasiswa (termasuk MBKM) dari Feeder'
+                'info' => 'Job akan memproses data aktivitas mahasiswa (termasuk MBKM) dari Feeder',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to queue sync aktivitas mahasiswa job',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

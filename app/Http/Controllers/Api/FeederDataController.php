@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\FeederClient;
 use App\Models\Institusi;
+use App\Services\FeederClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -28,18 +28,18 @@ class FeederDataController extends Controller
         try {
             // Validasi institusi exists
             $institusi = Institusi::where('slug', $slug)->first();
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'message' => 'Institusi not found',
-                    'error' => 'INSTITUSI_NOT_FOUND'
+                    'error' => 'INSTITUSI_NOT_FOUND',
                 ], 404);
             }
 
             // Check if institusi has feeder configuration
-            if (!$institusi->hasFeederConfig()) {
+            if (! $institusi->hasFeederConfig()) {
                 return response()->json([
                     'message' => 'Institusi does not have feeder configuration',
-                    'error' => 'FEEDER_CONFIG_MISSING'
+                    'error' => 'FEEDER_CONFIG_MISSING',
                 ], 400);
             }
 
@@ -52,13 +52,13 @@ class FeederDataController extends Controller
             // Add search filter if provided
             if ($request->has('search')) {
                 $search = $request->string('search');
-                $filter['nm_dosen'] = "like '%" . $search . "%'";
+                $filter['nm_dosen'] = "like '%".$search."%'";
             }
 
             // Add status filter
             if ($request->has('status')) {
                 $status = $request->string('status');
-                $filter['a_aktif'] = "= '" . $status . "'";
+                $filter['a_aktif'] = "= '".$status."'";
             }
 
             $limit = $request->integer('per_page', 10);
@@ -73,10 +73,10 @@ class FeederDataController extends Controller
                 $offset
             );
 
-            if (!$response) {
+            if (! $response) {
                 return response()->json([
                     'message' => 'Failed to connect to Feeder API',
-                    'error' => 'FEEDER_CONNECTION_FAILED'
+                    'error' => 'FEEDER_CONNECTION_FAILED',
                 ], 500);
             }
 
@@ -84,13 +84,13 @@ class FeederDataController extends Controller
                 Log::error('Feeder API Error when fetching dosen', [
                     'institusi_slug' => $slug,
                     'error_code' => $response['error_code'],
-                    'error_desc' => $response['error_desc'] ?? 'Unknown error'
+                    'error_desc' => $response['error_desc'] ?? 'Unknown error',
                 ]);
 
                 return response()->json([
                     'message' => 'Feeder API error',
                     'error' => $response['error_desc'] ?? 'Unknown error',
-                    'error_code' => $response['error_code']
+                    'error_code' => $response['error_code'],
                 ], 400);
             }
 
@@ -109,20 +109,20 @@ class FeederDataController extends Controller
                         'per_page' => $limit,
                         'total' => count($data),
                     ],
-                    'filters_applied' => $filter
-                ]
+                    'filters_applied' => $filter,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching dosen data', [
                 'institusi_slug' => $slug,
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
                 'message' => 'Internal server error',
-                'error' => config('app.debug') ? $e->getMessage() : 'Server error occurred'
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error occurred',
             ], 500);
         }
     }
@@ -134,15 +134,15 @@ class FeederDataController extends Controller
     {
         try {
             $institusi = Institusi::where('slug', $slug)->first();
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
-                    'message' => 'Institusi not found'
+                    'message' => 'Institusi not found',
                 ], 404);
             }
 
-            if (!$institusi->hasFeederConfig()) {
+            if (! $institusi->hasFeederConfig()) {
                 return response()->json([
-                    'message' => 'Institusi does not have feeder configuration'
+                    'message' => 'Institusi does not have feeder configuration',
                 ], 400);
             }
 
@@ -151,25 +151,25 @@ class FeederDataController extends Controller
             // Search by name
             if ($request->has('search')) {
                 $search = $request->string('search');
-                $filter['nm_pd'] = "like '%" . $search . "%'";
+                $filter['nm_pd'] = "like '%".$search."%'";
             }
 
             // Filter by program studi
             if ($request->has('prodi_id')) {
                 $prodiId = $request->string('prodi_id');
-                $filter['id_sms'] = "= '" . $prodiId . "'";
+                $filter['id_sms'] = "= '".$prodiId."'";
             }
 
             // Filter by angkatan
             if ($request->has('angkatan')) {
                 $angkatan = $request->string('angkatan');
-                $filter['id_periode_masuk'] = "= '" . $angkatan . "'";
+                $filter['id_periode_masuk'] = "= '".$angkatan."'";
             }
 
             // Filter by status mahasiswa
             if ($request->has('status')) {
                 $status = $request->string('status');
-                $filter['id_stat_mhs'] = "= '" . $status . "'";
+                $filter['id_stat_mhs'] = "= '".$status."'";
             }
 
             $limit = $request->integer('per_page', 10);
@@ -183,10 +183,10 @@ class FeederDataController extends Controller
                 $offset
             );
 
-            if (!$response || $response['error_code'] != 0) {
+            if (! $response || $response['error_code'] != 0) {
                 return response()->json([
                     'message' => 'Failed to fetch mahasiswa data',
-                    'error' => $response['error_desc'] ?? 'API Error'
+                    'error' => $response['error_desc'] ?? 'API Error',
                 ], 400);
             }
 
@@ -203,18 +203,18 @@ class FeederDataController extends Controller
                         'per_page' => $limit,
                         'total' => count($response['data'] ?? []),
                     ],
-                    'filters_applied' => $filter
-                ]
+                    'filters_applied' => $filter,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching mahasiswa data', [
                 'institusi_slug' => $slug,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Failed to fetch mahasiswa data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -226,7 +226,7 @@ class FeederDataController extends Controller
     {
         try {
             $institusi = Institusi::where('slug', $slug)->first();
-            if (!$institusi || !$institusi->hasFeederConfig()) {
+            if (! $institusi || ! $institusi->hasFeederConfig()) {
                 return response()->json(['message' => 'Institusi not found or no feeder config'], 404);
             }
 
@@ -234,13 +234,13 @@ class FeederDataController extends Controller
 
             if ($request->has('search')) {
                 $search = $request->string('search');
-                $filter['nm_prodi'] = "like '%" . $search . "%'";
+                $filter['nm_prodi'] = "like '%".$search."%'";
             }
 
             // Filter by jenjang
             if ($request->has('jenjang')) {
                 $jenjang = $request->string('jenjang');
-                $filter['id_jenj_didik'] = "= '" . $jenjang . "'";
+                $filter['id_jenj_didik'] = "= '".$jenjang."'";
             }
 
             $response = $this->feederClient->fetch(
@@ -251,10 +251,10 @@ class FeederDataController extends Controller
                 ($request->integer('page', 1) - 1) * $request->integer('per_page', 20)
             );
 
-            if (!$response || $response['error_code'] != 0) {
+            if (! $response || $response['error_code'] != 0) {
                 return response()->json([
                     'message' => 'Failed to fetch prodi data',
-                    'error' => $response['error_desc'] ?? 'API Error'
+                    'error' => $response['error_desc'] ?? 'API Error',
                 ], 400);
             }
 
@@ -266,13 +266,13 @@ class FeederDataController extends Controller
                         'slug' => $institusi->slug,
                         'nama' => $institusi->nama,
                     ],
-                    'total' => count($response['data'] ?? [])
-                ]
+                    'total' => count($response['data'] ?? []),
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to fetch prodi data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -284,7 +284,7 @@ class FeederDataController extends Controller
     {
         try {
             $institusi = Institusi::where('slug', $slug)->first();
-            if (!$institusi || !$institusi->hasFeederConfig()) {
+            if (! $institusi || ! $institusi->hasFeederConfig()) {
                 return response()->json(['message' => 'Institusi not found or no feeder config'], 404);
             }
 
@@ -295,17 +295,17 @@ class FeederDataController extends Controller
             $actionMap = [
                 'dosen' => 'GetListDosen',
                 'mahasiswa' => 'GetListMahasiswa',
-                'prodi' => 'GetProdi'
+                'prodi' => 'GetProdi',
             ];
 
             $action = $actionMap[$dataType] ?? 'GetListDosen';
 
             $response = $this->feederClient->fetch($action, [], 'id ASC', $limit, 0);
 
-            if (!$response || $response['error_code'] != 0) {
+            if (! $response || $response['error_code'] != 0) {
                 return response()->json([
                     'message' => 'Failed to sync data',
-                    'error' => $response['error_desc'] ?? 'API Error'
+                    'error' => $response['error_desc'] ?? 'API Error',
                 ], 400);
             }
 
@@ -316,7 +316,7 @@ class FeederDataController extends Controller
             Log::info('Data sync completed', [
                 'institusi_slug' => $slug,
                 'data_type' => $dataType,
-                'synced_count' => $syncedCount
+                'synced_count' => $syncedCount,
             ]);
 
             return response()->json([
@@ -326,17 +326,17 @@ class FeederDataController extends Controller
                 'institusi' => [
                     'slug' => $institusi->slug,
                     'nama' => $institusi->nama,
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Error during data sync', [
                 'institusi_slug' => $slug,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'message' => 'Sync failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

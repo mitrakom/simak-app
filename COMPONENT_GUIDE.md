@@ -2,6 +2,10 @@
 
 Panduan lengkap penggunaan komponen Tailwind CSS yang telah dibuat untuk Admin Dashboard SIMAK App.
 
+> **📌 PENTING**: Tim development memiliki background Bootstrap CSS dan sedang belajar Tailwind CSS.  
+> **Selalu gunakan komponen yang sudah ada** saat membuat form atau UI, jangan menulis raw HTML dengan Tailwind classes.  
+> Komponen dapat diedit untuk menambah fitur baru, tetapi harus tetap flexible dan sederhana.
+
 ## Daftar Isi
 1. [Layout](#layout)
 2. [Komponen Dasar](#komponen-dasar)

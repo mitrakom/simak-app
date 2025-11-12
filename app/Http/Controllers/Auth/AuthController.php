@@ -30,6 +30,12 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request, Institusi $institusi): RedirectResponse
     {
+        Log::info('Login attempt started', [
+            'email' => $request->input('email'),
+            'institusi_id' => $institusi->id,
+            'institusi_slug' => $institusi->slug,
+        ]);
+
         // Authenticate with institusi_id constraint
         $request->authenticate($institusi->id);
 
@@ -39,19 +45,19 @@ class AuthController extends Controller
         // Get the authenticated user
         $user = Auth::user();
 
+        Log::info('User authenticated', [
+            'user_id' => $user->id,
+            'is_authenticated' => Auth::check(),
+        ]);
+
         // Verify user belongs to this institusi (double check)
         if ($user->institusi_id !== $institusi->id) {
             Auth::logout();
+
             return back()->withErrors([
                 'email' => 'User tidak terdaftar pada institusi ini.',
             ]);
         }
-
-        // Create Sanctum token for API access
-        $token = $user->createToken('web-session')->plainTextToken;
-
-        // Store token in session for future API calls
-        session(['api_token' => $token]);
 
         // Log successful login
         Log::info('User logged in', [
@@ -63,7 +69,10 @@ class AuthController extends Controller
         ]);
 
         // Flash success message
-        session()->flash('success', 'Login berhasil! Selamat datang, ' . $user->name);
+        session()->flash('success', 'Login berhasil! Selamat datang, '.$user->name);
+
+        $redirectUrl = route('admin.dashboard', ['institusi' => $institusi->slug]);
+        Log::info('Redirecting to dashboard', ['url' => $redirectUrl]);
 
         // Redirect to admin dashboard
         return redirect()->route('admin.dashboard', ['institusi' => $institusi->slug]);
@@ -74,9 +83,6 @@ class AuthController extends Controller
      */
     public function logout(Request $request, Institusi $institusi): RedirectResponse
     {
-        // Revoke all tokens for the user
-        $request->user()->tokens()->delete();
-
         // Logout from web session
         Auth::guard('web')->logout();
 

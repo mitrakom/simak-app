@@ -33,30 +33,30 @@ class TestController extends Controller
             // Test koneksi dengan method baru
             $connectionTest = $this->feederClient->testConnection();
 
-            if (!$connectionTest['success']) {
+            if (! $connectionTest['success']) {
                 return response()->json([
                     'message' => 'Feeder connection test failed',
                     'error' => $connectionTest['error'],
-                    'institusi' => $connectionTest['institusi'] ?? null
+                    'institusi' => $connectionTest['institusi'] ?? null,
                 ], 500);
             }
 
             return response()->json([
                 'message' => 'Feeder connection test successful!',
                 'institusi' => $connectionTest['institusi'],
-                'timestamp' => now()->toISOString()
+                'timestamp' => now()->toISOString(),
             ]);
         } catch (\Exception $e) {
             Log::error('Feeder connection test failed', [
                 'user_id' => \Illuminate\Support\Facades\Auth::id(),
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
                 'message' => 'Feeder connection test failed',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
             ], 500);
         }
     }

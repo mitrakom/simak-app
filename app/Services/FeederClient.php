@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 class FeederClient
 {
@@ -56,7 +56,7 @@ class FeederClient
             Log::info('FeederClient initialized', [
                 'user_id' => $this->user->id,
                 'institusi_slug' => $this->user->institusi->slug,
-                'feeder_url' => $this->user->institusi->feeder_url
+                'feeder_url' => $this->user->institusi->feeder_url,
             ]);
         }
     }
@@ -72,7 +72,7 @@ class FeederClient
         Log::info('FeederClient institusi set for job context', [
             'institusi_id' => $institusi->id,
             'institusi_slug' => $institusi->slug,
-            'feeder_url' => $institusi->feeder_url
+            'feeder_url' => $institusi->feeder_url,
         ]);
     }
 
@@ -106,7 +106,7 @@ class FeederClient
     public function request(array $payload)
     {
         // Enforce read-only policy before any outbound call
-        $this->assertReadOnlyAllowed((string)($payload['act'] ?? ''), $payload);
+        $this->assertReadOnlyAllowed((string) ($payload['act'] ?? ''), $payload);
 
         $response = Http::timeout($this->timeout) // Set timeout yang lebih lama
             ->retry(3, 1000) // Retry otomatis jika gagal
@@ -115,12 +115,12 @@ class FeederClient
         // Check for connection errors or timeout
         if ($response->failed()) {
             $error = $response->toException()->getMessage();
-            Log::error("HTTP Error requesting Feeder API", [
+            Log::error('HTTP Error requesting Feeder API', [
                 'institusi_slug' => $this->user?->institusi?->slug ?? $this->institusi?->slug,
                 'feeder_url' => $this->baseUrl,
                 'error' => $error,
                 'payload' => $this->sanitizePayloadForLog($payload),
-                'status' => $response->status()
+                'status' => $response->status(),
             ]);
 
             return [
@@ -133,11 +133,11 @@ class FeederClient
 
         // Check for API errors
         if (($responseData['error_code'] ?? 0) != 0) {
-            Log::error("Feeder API Error", [
+            Log::error('Feeder API Error', [
                 'institusi_slug' => $this->user?->institusi?->slug ?? $this->institusi?->slug,
                 'payload' => $this->sanitizePayloadForLog($payload),
                 'error_code' => $responseData['error_code'] ?? 'unknown',
-                'error_desc' => $responseData['error_desc'] ?? 'Unknown Error'
+                'error_desc' => $responseData['error_desc'] ?? 'Unknown Error',
             ]);
         }
 
@@ -150,7 +150,7 @@ class FeederClient
      */
     private function assertReadOnlyAllowed(string $act, array $payload = []): void
     {
-        if (!$this->readOnly) {
+        if (! $this->readOnly) {
             return; // Explicitly allowed to write (not expected per policy)
         }
 
@@ -169,7 +169,7 @@ class FeederClient
         $hasKey = array_key_exists('key', $payload);
         $looksLikeWritePayload = $hasRecord || $hasKey;
 
-        if ($isWriteByName || ($looksLikeWritePayload && !str_starts_with($actLower, 'get'))) {
+        if ($isWriteByName || ($looksLikeWritePayload && ! str_starts_with($actLower, 'get'))) {
             Log::warning('Blocked Feeder write operation due to read-only policy', [
                 'institusi_slug' => $this->user?->institusi?->slug,
                 'feeder_url' => $this->baseUrl ?? null,
@@ -198,6 +198,7 @@ class FeederClient
 
         return $sanitized;
     }
+
     /**
      * Generate cache key yang unik per institusi untuk token storage
      */
@@ -206,7 +207,7 @@ class FeederClient
         // Gunakan institusi dari user jika ada, jika tidak gunakan institusi yang di-set langsung
         $institusi = $this->user?->institusi ?? $this->institusi;
 
-        if (!$institusi) {
+        if (! $institusi) {
             throw new \Exception('No institusi available for token cache key generation');
         }
 
@@ -220,14 +221,14 @@ class FeederClient
         // Gunakan institusi dari user jika ada, jika tidak gunakan institusi yang di-set langsung
         $institusi = $this->user?->institusi ?? $this->institusi;
 
-        if (!$institusi) {
+        if (! $institusi) {
             throw new \Exception('No institusi available for authentication');
         }
 
         $response = $this->request([
             'act' => 'GetToken',
             'username' => $institusi->feeder_username,
-            'password' => $institusi->feeder_password
+            'password' => $institusi->feeder_password,
         ]);
 
         if ($response && isset($response['data']['token'])) {
@@ -239,19 +240,19 @@ class FeederClient
             \Illuminate\Support\Facades\Cache::put($cacheKey, $token, $expiration);
             \Illuminate\Support\Facades\Cache::put($cacheKey . '_expiration', $expiration, $expiration->addMinutes(5));
 
-            Log::info("Feeder authentication successful", [
+            Log::info('Feeder authentication successful', [
                 'institusi_slug' => $institusi->slug,
                 'username' => $institusi->feeder_username,
-                'cache_key' => $cacheKey
+                'cache_key' => $cacheKey,
             ]);
 
             return $token;
         }
 
-        Log::error("Feeder authentication failed", [
+        Log::error('Feeder authentication failed', [
             'institusi_slug' => $institusi->slug,
             'username' => $institusi->feeder_username,
-            'error' => $response['error_desc'] ?? 'Unknown authentication error'
+            'error' => $response['error_desc'] ?? 'Unknown authentication error',
         ]);
 
         return ['error' => 'Authentication failed', 'response' => $response];
@@ -276,7 +277,9 @@ class FeederClient
     public function fetch(string $act, array $filter = [], string $order = '', int $limit = 10, int $offset = 0)
     {
         $token = $this->ensureAuthenticated();
-        if (!$token) return null;
+        if (! $token) {
+            return null;
+        }
 
         $filterString = $this->buildFilterString($filter);
 
@@ -286,40 +289,45 @@ class FeederClient
             'filter' => $filterString,
             'order' => $order,
             'limit' => $limit,
-            'offset' => $offset
+            'offset' => $offset,
         ]);
     }
 
-    public function fetchs(string $act, string $filter = "", string $order = '', int $limit = 10, int $offset = 0)
+    public function fetchs(string $act, string $filter = '', string $order = '', int $limit = 10, int $offset = 0)
     {
         $token = $this->ensureAuthenticated();
-        if (!$token) return null;
+        if (! $token) {
+            return null;
+        }
 
         return $this->request([
             'act' => $act,
             'token' => $token,
-            'filter' => $filter ?? "",  // Pastikan filter dalam bentuk string SQL
+            'filter' => $filter ?? '',  // Pastikan filter dalam bentuk string SQL
             'order' => $order,
             'limit' => $limit,
-            'offset' => $offset
+            'offset' => $offset,
         ]);
     }
 
     private function buildFilterString(array $filter): string
     {
         if (empty($filter)) {
-            return ""; // Kembalikan string kosong jika tidak ada filter
+            return ''; // Kembalikan string kosong jika tidak ada filter
         }
 
         $filterArray = [];
 
         foreach ($filter as $column => $condition) {
+            // Convert condition to string for checking
+            $conditionStr = (string) $condition;
+
             // Check if condition is already a complete SQL condition
-            if (str_contains($condition, '=') || str_contains($condition, '<') || str_contains($condition, '>') || str_contains($condition, 'LIKE')) {
-                $filterArray[] = "$column $condition";
+            if (str_contains($conditionStr, '=') || str_contains($conditionStr, '<') || str_contains($conditionStr, '>') || str_contains($conditionStr, 'LIKE')) {
+                $filterArray[] = "$column $conditionStr";
             } else {
                 // For simple equality check, wrap value in quotes
-                $filterArray[] = "$column='$condition'";
+                $filterArray[] = "$column='$conditionStr'";
             }
         }
 
@@ -362,7 +370,7 @@ class FeederClient
     {
         $institusi = $this->user?->institusi ?? $this->institusi;
 
-        if (!$institusi) {
+        if (! $institusi) {
             throw new \Exception('No institusi available');
         }
 
@@ -370,12 +378,83 @@ class FeederClient
     }
 
     /**
+     * Get dictionary (field structure) for a specific Feeder API endpoint
+     *
+     * This method fetches the field definitions/schema for any Feeder API endpoint.
+     * Useful for understanding the exact structure and field types expected by the API.
+     *
+     * Example usage:
+     * ```php
+     * $client = new FeederClient();
+     * $client->setInstitusi($institusi);
+     * $dictionary = $client->getDictionary('GetProdi');
+     * $dictionary = $client->getDictionary('GetListMahasiswa');
+     * ```
+     *
+     * Example response structure:
+     * ```
+     * [
+     *     'error_code' => 0,
+     *     'error_desc' => '',
+     *     'data' => [
+     *         ['Field' => 'id_prodi', 'Type' => 'uuid', ...],
+     *         ['Field' => 'kode_program_studi', 'Type' => 'varchar(20)', ...],
+     *         ...
+     *     ]
+     * ]
+     * ```
+     *
+     * @param  string  $fungsi  The Feeder API endpoint name (e.g., 'GetProdi', 'GetListMahasiswa')
+     * @return array|null Response from Feeder API containing field definitions
+     */
+    public function getDictionary(string $fungsi): ?array
+    {
+        $token = $this->ensureAuthenticated();
+
+        if (! $token) {
+            Log::error('Failed to get token for GetDictionary', [
+                'institusi_slug' => $this->institusi?->slug ?? 'unknown',
+                'fungsi' => $fungsi,
+            ]);
+
+            return null;
+        }
+
+        $payload = [
+            'token' => $token,
+            'act' => 'GetDictionary',
+            'fungsi' => $fungsi,
+        ];
+
+        $response = $this->request($payload);
+
+        if (! $response || ($response['error_code'] ?? 0) != 0) {
+            Log::warning('GetDictionary failed', [
+                'institusi_slug' => $this->institusi?->slug ?? 'unknown',
+                'fungsi' => $fungsi,
+                'error_code' => $response['error_code'] ?? 'unknown',
+                'error_desc' => $response['error_desc'] ?? 'unknown',
+            ]);
+
+            return null;
+        }
+
+        Log::info('GetDictionary successful', [
+            'institusi_slug' => $this->institusi?->slug ?? 'unknown',
+            'fungsi' => $fungsi,
+            'fields_count' => count($response['data'] ?? []),
+        ]);
+
+        return $response;
+    }
+
+    /**
      * Get list dosen from Feeder API using GetListDosen endpoint
-     * 
-     * @param array $filter Filter conditions for the query
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions for the query
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API
      */
     public function getListDosen(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -385,22 +464,22 @@ class FeederClient
 
     /**
      * Get list mahasiswa from Feeder API using GetListMahasiswa endpoint
-     * 
-     * @param array $filter Filter conditions for the query (e.g., ['id_periode' => '20241'])
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch (0 = all)
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions for the query (e.g., ['id_periode' => '20241'])
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch (0 = all)
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API
      */
     /**
      * Get list mahasiswa from Feeder API
-     * 
-     * @param array|string $filter Filter conditions - can be array or PostgreSQL filter string
-     *                            Example array: ['nim' => '12345']
-     *                            Example string: "left(id_periode,4)='2024'"
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch (0 = all)
-     * @param int $offset Offset for pagination
+     *
+     * @param  array|string  $filter  Filter conditions - can be array or PostgreSQL filter string
+     *                                Example array: ['nim' => '12345']
+     *                                Example string: "left(id_periode,4)='2024'"
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch (0 = all)
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API
      */
     public function getListMahasiswa(array|string $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -416,11 +495,11 @@ class FeederClient
 
     /**
      * Get biodata mahasiswa detail from Feeder API using GetBiodataMahasiswa endpoint
-     * 
-     * @param array $filter Filter conditions (e.g., ['id_mahasiswa' => 'uuid'])
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions (e.g., ['id_mahasiswa' => 'uuid'])
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API
      */
     public function getBiodataMahasiswa(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -430,13 +509,13 @@ class FeederClient
 
     /**
      * Get list perkuliahan mahasiswa (riwayat akademik per semester) dari Feeder
-     * 
+     *
      * Response includes: IPS, IPK, SKS semester, SKS total, status mahasiswa per semester
-     * 
-     * @param array $filter Filter conditions (e.g., ['angkatan' => '2024'])
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions (e.g., ['angkatan' => '2024'])
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API with academic records per semester
      */
     public function getListPerkuliahanMahasiswa(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -446,13 +525,13 @@ class FeederClient
 
     /**
      * Get list mahasiswa bimbingan dosen from Feeder API using GetMahasiswaBimbinganDosen endpoint
-     * 
+     *
      * Response includes: bimbingan data with mahasiswa, dosen, aktivitas info
-     * 
-     * @param array $filter Filter conditions (e.g., ['id_dosen' => 'uuid'])
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions (e.g., ['id_dosen' => 'uuid'])
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API with bimbingan records
      */
     public function getMahasiswaBimbinganDosen(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -462,11 +541,11 @@ class FeederClient
 
     /**
      * Get riwayat pendidikan dosen from Feeder API using GetRiwayatPendidikanDosen endpoint
-     * 
-     * @param array $filter Filter conditions for the query
-     * @param string $order Order by clause
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions for the query
+     * @param  string  $order  Order by clause
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API with pendidikan records
      */
     public function getRiwayatPendidikanDosen(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -476,11 +555,11 @@ class FeederClient
 
     /**
      * Get riwayat jabatan fungsional dosen from Feeder API using GetRiwayatFungsionalDosen endpoint
-     * 
-     * @param array $filter Filter conditions for the query
-     * @param string $order Order by clause
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions for the query
+     * @param  string  $order  Order by clause
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API with jabatan fungsional records
      */
     public function getRiwayatFungsionalDosen(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -490,11 +569,11 @@ class FeederClient
 
     /**
      * Get riwayat sertifikasi dosen from Feeder API using GetRiwayatSertifikasiDosen endpoint
-     * 
-     * @param array $filter Filter conditions for the query
-     * @param string $order Order by clause
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions for the query
+     * @param  string  $order  Order by clause
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API with sertifikasi records
      */
     public function getRiwayatSertifikasiDosen(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -504,22 +583,22 @@ class FeederClient
 
     /**
      * Get list mahasiswa lulus/DO from Feeder API using GetListMahasiswaLulusDO endpoint
-     * 
-     * @param array $filter Filter conditions for the query
-     * @param string $order Order by clause
-     * @param int $limit Maximum number of records to fetch
-     * @param int $offset Offset for pagination
+     *
+     * @param  array  $filter  Filter conditions for the query
+     * @param  string  $order  Order by clause
+     * @param  int  $limit  Maximum number of records to fetch
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API with mahasiswa lulus/DO records
      */
     /**
      * Get list mahasiswa lulus/DO from Feeder API
-     * 
-     * @param array|string $filter Filter conditions - can be array or PostgreSQL filter string
-     *                            Example array: ['angkatan' => '2024']
-     *                            Example string: "angkatan='2024' and right(tanggal_keluar,4)='2024'"
-     * @param string $order Order clause for sorting
-     * @param int $limit Maximum number of records to fetch (0 = all)
-     * @param int $offset Offset for pagination
+     *
+     * @param  array|string  $filter  Filter conditions - can be array or PostgreSQL filter string
+     *                                Example array: ['angkatan' => '2024']
+     *                                Example string: "angkatan='2024' and right(tanggal_keluar,4)='2024'"
+     * @param  string  $order  Order clause for sorting
+     * @param  int  $limit  Maximum number of records to fetch (0 = all)
+     * @param  int  $offset  Offset for pagination
      * @return array|null Response from Feeder API
      */
     public function getListMahasiswaLulusDO(array|string $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -535,11 +614,11 @@ class FeederClient
 
     /**
      * Ambil data prestasi mahasiswa dari Feeder
-     * 
-     * @param array $filter Filter parameters untuk query
-     * @param string $order Order by column
-     * @param int $limit Limit jumlah record (0 = no limit)
-     * @param int $offset Offset untuk pagination
+     *
+     * @param  array  $filter  Filter parameters untuk query
+     * @param  string  $order  Order by column
+     * @param  int  $limit  Limit jumlah record (0 = no limit)
+     * @param  int  $offset  Offset untuk pagination
      * @return array|null Response dari API atau null jika gagal
      */
     public function getListPrestasiMahasiswa(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -549,11 +628,11 @@ class FeederClient
 
     /**
      * Mengambil data aktivitas mahasiswa dari API Feeder
-     * 
-     * @param array $filter Filter untuk query (misal: id_semester)
-     * @param string $order Field untuk sorting
-     * @param int $limit Batas jumlah data (0 = unlimited)
-     * @param int $offset Offset untuk pagination
+     *
+     * @param  array  $filter  Filter untuk query (misal: id_semester)
+     * @param  string  $order  Field untuk sorting
+     * @param  int  $limit  Batas jumlah data (0 = unlimited)
+     * @param  int  $offset  Offset untuk pagination
      * @return array|null Response dari API atau null jika gagal
      */
     public function getListAktivitasMahasiswa(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -563,11 +642,11 @@ class FeederClient
 
     /**
      * Mengambil data anggota aktivitas mahasiswa dari API Feeder
-     * 
-     * @param array $filter Filter untuk query (misal: id_aktivitas)
-     * @param string $order Field untuk sorting
-     * @param int $limit Batas jumlah data (0 = unlimited)
-     * @param int $offset Offset untuk pagination
+     *
+     * @param  array  $filter  Filter untuk query (misal: id_aktivitas)
+     * @param  string  $order  Field untuk sorting
+     * @param  int  $limit  Batas jumlah data (0 = unlimited)
+     * @param  int  $offset  Offset untuk pagination
      * @return array|null Response dari API atau null jika gagal
      */
     public function getListAnggotaAktivitasMahasiswa(array $filter = [], string $order = '', int $limit = 0, int $offset = 0): ?array
@@ -583,10 +662,10 @@ class FeederClient
         try {
             $institusi = $this->user?->institusi ?? $this->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return [
                     'success' => false,
-                    'error' => 'No institusi available for connection test'
+                    'error' => 'No institusi available for connection test',
                 ];
             }
 
@@ -598,8 +677,8 @@ class FeederClient
                     'error' => $authResult['error'] ?? 'Authentication failed',
                     'institusi' => [
                         'slug' => $institusi->slug,
-                        'nama' => $institusi->nama
-                    ]
+                        'nama' => $institusi->nama,
+                    ],
                 ];
             }
 
@@ -609,15 +688,15 @@ class FeederClient
                 'institusi' => [
                     'slug' => $institusi->slug,
                     'nama' => $institusi->nama,
-                    'feeder_url' => $institusi->feeder_url
-                ]
+                    'feeder_url' => $institusi->feeder_url,
+                ],
             ];
         } catch (\Exception $e) {
             $institusi = $this->user?->institusi ?? $this->institusi;
 
             Log::error('Feeder connection test failed', [
                 'institusi_slug' => $institusi?->slug ?? 'unknown',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return [
@@ -625,8 +704,8 @@ class FeederClient
                 'error' => $e->getMessage(),
                 'institusi' => [
                     'slug' => $institusi?->slug ?? 'unknown',
-                    'nama' => $institusi?->nama ?? 'unknown'
-                ]
+                    'nama' => $institusi?->nama ?? 'unknown',
+                ],
             ];
         }
     }
@@ -644,12 +723,11 @@ class FeederClient
 
         Log::info('Feeder token cleared', [
             'institusi_slug' => $this->user?->institusi?->slug ?? $this->institusi?->slug ?? 'unknown',
-            'cache_key' => $cacheKey
+            'cache_key' => $cacheKey,
         ]);
     }
 
     // contoh penggunaan pada controller
-
 
     /**
      * Get riwayat penelitian dosen data from Feeder API
@@ -661,7 +739,7 @@ class FeederClient
 
     /*
         *
-    
+
         $filter = [
             'nama_dosen' => "like '%ga%'",     // Nama dosen mengandung "ga"
             'usia' => "> 30",                 // Usia lebih dari 30

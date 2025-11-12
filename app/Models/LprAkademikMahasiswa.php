@@ -28,13 +28,17 @@ class LprAkademikMahasiswa extends Model
         'nim',
         'nama_mahasiswa',
         'angkatan',
-        'nama_prodi',
-        'semester',
+        'nama_program_studi', // Renamed to match API
+        'id_semester', // Renamed to match API
+        'nama_semester', // NEW from API
+        'id_status_mahasiswa', // NEW from API
+        'nama_status_mahasiswa', // Renamed to match API
         'ips',
         'ipk',
         'sks_semester',
         'sks_total',
-        'status_mahasiswa',
+        'biaya_kuliah_smt', // NEW from API
+        'id_pembiayaan', // NEW from API
     ];
 
     /**
@@ -46,6 +50,7 @@ class LprAkademikMahasiswa extends Model
         'ipk' => 'decimal:2',
         'sks_semester' => 'integer',
         'sks_total' => 'integer',
+        'biaya_kuliah_smt' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

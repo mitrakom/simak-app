@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 /**
  * Example controller using the new middleware approach
- * 
+ *
  * Benefits:
  * 1. No authentication validation in constructor/methods
  * 2. Clean separation of concerns
@@ -37,7 +37,7 @@ class DosenController extends Controller
 
             $filter = [];
             if ($request->has('nama')) {
-                $filter['nm_dosen'] = "like '%" . $request->string('nama') . "%'";
+                $filter['nm_dosen'] = "like '%".$request->string('nama')."%'";
             }
 
             $response = $this->feederClient->fetch(
@@ -48,10 +48,10 @@ class DosenController extends Controller
                 ($request->integer('page', 1) - 1) * $request->integer('per_page', 10)
             );
 
-            if (!$response || ($response['error_code'] ?? 0) != 0) {
+            if (! $response || ($response['error_code'] ?? 0) != 0) {
                 return response()->json([
                     'message' => 'Failed to fetch dosen data',
-                    'error' => $response['error_desc'] ?? 'Unknown error'
+                    'error' => $response['error_desc'] ?? 'Unknown error',
                 ], 400);
             }
 
@@ -62,13 +62,13 @@ class DosenController extends Controller
                 'pagination' => [
                     'page' => $request->integer('page', 1),
                     'per_page' => $request->integer('per_page', 10),
-                    'total' => count($response['data'] ?? [])
-                ]
+                    'total' => count($response['data'] ?? []),
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal server error',
-                'error' => config('app.debug') ? $e->getMessage() : 'Server error'
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error',
             ], 500);
         }
     }
@@ -86,28 +86,28 @@ class DosenController extends Controller
                 ['id_dosen' => "= '$id'"]
             );
 
-            if (!$response || ($response['error_code'] ?? 0) != 0) {
+            if (! $response || ($response['error_code'] ?? 0) != 0) {
                 return response()->json([
                     'message' => 'Failed to fetch dosen data',
-                    'error' => $response['error_desc'] ?? 'Unknown error'
+                    'error' => $response['error_desc'] ?? 'Unknown error',
                 ], 400);
             }
 
             $dosen = $response['data'][0] ?? null;
-            if (!$dosen) {
+            if (! $dosen) {
                 return response()->json([
-                    'message' => 'Dosen not found'
+                    'message' => 'Dosen not found',
                 ], 404);
             }
 
             return response()->json([
                 'message' => 'Dosen data retrieved successfully',
-                'data' => $dosen
+                'data' => $dosen,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal server error',
-                'error' => config('app.debug') ? $e->getMessage() : 'Server error'
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error',
             ], 500);
         }
     }

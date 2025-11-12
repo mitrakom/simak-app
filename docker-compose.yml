@@ -4,42 +4,54 @@ services:
     build:
       context: .
       dockerfile: docker/app/Dockerfile
-      args:
-        - PHP_FPM_PORT=${DOCKER_APP_PORT:-9100}
-    container_name: ${DOCKER_CONTAINER_PREFIX:-simak_laravel}_app
+    container_name: mitranet_simak_app_dev # Nama unik agar tidak bentrok
     restart: unless-stopped
     working_dir: /var/www/html
     network_mode: host  # Gunakan network host seperti Moodle agar bisa akses DB OS
     volumes:
       - .:/var/www/html # Sinkronisasi kode
-    environment:
-      - PHP_FPM_PORT=${DOCKER_APP_PORT:-9100}
     deploy:
       resources:
         limits:
           cpus: '1.0'  # Batasi 1 Core CPU
           memory: 1G   # Batasi 1GB RAM
 
-  # 2. Layanan Nginx (Web Server)
+  # 2. Layanan Queue Worker (Laravel Queue)
+  queue:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: mitranet_simak_queue_dev # Nama unik
+    restart: unless-stopped
+    working_dir: /var/www/html
+    network_mode: host  # Gunakan network host untuk akses DB OS
+    command: php artisan queue:work --tries=3 --timeout=300 --sleep=3 --max-jobs=1000
+    volumes:
+      - .:/var/www/html # Sinkronisasi kode
+    depends_on:
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'  # Batasi 0.5 Core CPU
+          memory: 512M # Batasi 512MB RAM
+
+  # 3. Layanan Nginx (Web Server)
   web:
     image: nginx:alpine
-    container_name: ${DOCKER_CONTAINER_PREFIX:-simak_laravel}_web
+    container_name: mitranet_simak_web_dev # Nama unik
     restart: unless-stopped
     network_mode: host  # Gunakan network host
     volumes:
       - .:/var/www/html
-      - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf.template
-    environment:
-      - NGINX_PORT=${DOCKER_WEB_PORT:-8910}
-      - PHP_FPM_PORT=${DOCKER_APP_PORT:-9100}
-    command: /bin/sh -c "envsubst '$$NGINX_PORT $$PHP_FPM_PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
 
-  # 3. Layanan Node (Untuk Frontend)
+  # 4. Layanan Node (Untuk Frontend)
   node:
     image: node:18-alpine
-    container_name: ${DOCKER_CONTAINER_PREFIX:-simak_laravel}_node
+    container_name: mitranet_simak_node_dev # Nama unik
     working_dir: /var/www/html
     tty: true
     network_mode: host  # Gunakan network host

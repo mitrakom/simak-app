@@ -41,7 +41,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Reset Password - SIMAK')
-            ->greeting('Halo ' . $notifiable->name . '!')
+            ->greeting('Halo '.$notifiable->name.'!')
             ->line('Kami menerima permintaan untuk reset password akun Anda.')
             ->line('Silakan klik tombol di bawah ini untuk reset password:')
             ->action('Reset Password', $resetUrl)

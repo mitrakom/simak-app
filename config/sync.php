@@ -9,7 +9,7 @@ return [
     | Default Sync Job Parameters
     |--------------------------------------------------------------------------
     |
-    | Default parameter values untuk setiap sync job. Parameter ini bisa 
+    | Default parameter values untuk setiap sync job. Parameter ini bisa
     | disesuaikan melalui interface web atau langsung di file ini.
     |
     */

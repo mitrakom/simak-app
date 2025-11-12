@@ -8,17 +8,25 @@
     <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Theme Styles -->
+    <x-theme-styles :institusi="$currentInstitusi ?? null" />
+    
     @livewireStyles
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
+    @php
+        $currentInstitusi = request()->route('institusi');
+    @endphp
+    
     <div class="min-h-screen">
         <!-- Sidebar -->
-        <x-admin.sidebar />
+        <x-admin.sidebar :currentInstitusi="$currentInstitusi" />
 
         <!-- Main Content Area -->
         <div class="lg:pl-64">
             <!-- Navbar -->
-            <x-admin.navbar />
+            <x-admin.navbar :currentInstitusi="$currentInstitusi" />
 
             <!-- Page Content -->
             <main class="p-4 lg:p-6">

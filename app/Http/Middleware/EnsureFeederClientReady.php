@@ -6,13 +6,12 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 class EnsureFeederClientReady
 {
     /**
      * Middleware untuk memastikan user terotentikasi dan memiliki konfigurasi feeder yang lengkap
-     * 
+     *
      * Middleware ini akan:
      * 1. Memastikan user sudah terotentikasi
      * 2. Memastikan user memiliki institusi
@@ -22,23 +21,23 @@ class EnsureFeederClientReady
     {
         // Cek user terotentikasi
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'message' => 'Authentication required',
-                'error' => 'User must be authenticated to access this resource'
+                'error' => 'User must be authenticated to access this resource',
             ], 401);
         }
 
         // Load institusi relation jika belum ter-load
-        if (!$user->relationLoaded('institusi')) {
+        if (! $user->relationLoaded('institusi')) {
             $user->load('institusi');
         }
 
         // Cek user memiliki institusi
-        if (!$user->institusi) {
+        if (! $user->institusi) {
             return response()->json([
                 'message' => 'Institusi not found',
-                'error' => 'Authenticated user must have an associated institusi'
+                'error' => 'Authenticated user must have an associated institusi',
             ], 422);
         }
 
@@ -55,10 +54,10 @@ class EnsureFeederClientReady
                 'institusi' => [
                     'slug' => $institusi->slug,
                     'nama' => $institusi->nama,
-                    'has_feeder_url' => !empty($institusi->feeder_url),
-                    'has_feeder_username' => !empty($institusi->feeder_username),
-                    'has_feeder_password' => !empty($institusi->feeder_password)
-                ]
+                    'has_feeder_url' => ! empty($institusi->feeder_url),
+                    'has_feeder_username' => ! empty($institusi->feeder_username),
+                    'has_feeder_password' => ! empty($institusi->feeder_password),
+                ],
             ], 422);
         }
 

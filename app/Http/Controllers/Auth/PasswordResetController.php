@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\SendResetLinkRequest;
 use App\Http\Requests\Auth\PasswordResetRequest;
+use App\Http\Requests\Auth\SendResetLinkRequest;
 use App\Models\Institusi;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +38,7 @@ class PasswordResetController extends Controller
             ->where('institusi_id', $institusi->id)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors([
                 'email' => 'Email tidak terdaftar pada institusi ini.',
             ])->withInput();
@@ -66,7 +66,7 @@ class PasswordResetController extends Controller
         $resetUrl = route('auth.password.reset.form', [
             'institusi' => $institusi->slug,
             'token' => $token,
-        ]) . '?email=' . urlencode($request->email);
+        ]).'?email='.urlencode($request->email);
 
         // Flash success message with URL (in production, this would be sent via email)
         session()->flash('reset_link', $resetUrl);
@@ -97,14 +97,14 @@ class PasswordResetController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$resetRecord) {
+        if (! $resetRecord) {
             return back()->withErrors([
                 'email' => 'Token reset password tidak valid atau sudah kadaluarsa.',
             ])->withInput();
         }
 
         // Verify token matches
-        if (!Hash::check($request->token, $resetRecord->token)) {
+        if (! Hash::check($request->token, $resetRecord->token)) {
             return back()->withErrors([
                 'email' => 'Token reset password tidak valid.',
             ])->withInput();
@@ -128,7 +128,7 @@ class PasswordResetController extends Controller
             ->where('institusi_id', $institusi->id)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors([
                 'email' => 'User tidak ditemukan pada institusi ini.',
             ])->withInput();

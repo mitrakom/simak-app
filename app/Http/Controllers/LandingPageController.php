@@ -9,7 +9,7 @@ use Illuminate\View\View;
 
 /**
  * Controller untuk halaman landing page multi-tenant.
- * 
+ *
  * Setiap institusi memiliki landing page unik berdasarkan slug URL.
  * Route Model Binding otomatis resolve Institusi dari parameter {institusi:slug}.
  */
@@ -17,9 +17,8 @@ class LandingPageController extends Controller
 {
     /**
      * Tampilkan landing page untuk institusi tertentu.
-     * 
-     * @param Institusi $institusi Instance yang sudah di-resolve oleh Route Model Binding
-     * @return View
+     *
+     * @param  Institusi  $institusi  Instance yang sudah di-resolve oleh Route Model Binding
      */
     public function show(Institusi $institusi): View
     {

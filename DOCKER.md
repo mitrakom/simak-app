@@ -85,9 +85,36 @@ docker exec -it simak_laravel_app composer install
 
 ### NPM
 ```bash
-docker exec -it simak_laravel_node npm install
-docker exec -it simak_laravel_node npm run build
+# Install dependencies
+docker compose exec node npm install
+
+# Build for production
+docker compose exec node npm run build
+
+# Run dev mode (watch mode)
+docker compose exec node npm run dev
 ```
+
+## 🎨 Frontend Development
+
+### Build Tailwind CSS & Vite Assets
+
+Setiap kali ada perubahan pada:
+- Tailwind classes di Blade files
+- JavaScript/CSS di `resources/` folder
+- Livewire components dengan styling baru
+
+**Wajib rebuild assets:**
+```bash
+docker compose exec node npm run build
+```
+
+**Atau jalankan dev mode untuk auto-rebuild:**
+```bash
+docker compose exec node npm run dev
+```
+
+> **💡 Tip:** Gunakan `npm run dev` saat development untuk auto-reload, dan `npm run build` sebelum commit/deploy ke production.
 
 ## 🔍 Verifikasi Port
 

@@ -13,23 +13,35 @@ class LprAktivitasMahasiswa extends Model
 
     protected $fillable = [
         'institusi_id',
-        'mahasiswa_id',
-        'anggota_aktivitas_feeder_id',
-        'aktivitas_feeder_id',
-        'mahasiswa_feeder_id',
-        'registrasi_feeder_id',
+        // Feeder IDs - exact API field names (100% match)
+        'id_anggota',              // UUID anggota (UNIQUE KEY)
+        'id_aktivitas',            // UUID aktivitas
+        'id_mahasiswa',            // UUID individu mahasiswa
+        'id_registrasi_mahasiswa', // UUID registrasi mahasiswa
+        // Denormalized fields from API
         'nim',
         'nama_mahasiswa',
-        'judul_aktivitas',
-        'jenis_aktivitas',
-        'lokasi',
-        'apakah_mbkm',
-        'semester',
-        'peran_mahasiswa',
+        'judul',                   // Activity title
+        'id_jenis_aktivitas',      // Activity type ID
+        'nama_jenis_aktivitas',    // Activity type name
+        'jenis_peran',             // Member role code
+        'nama_jenis_peran',        // Member role name
+        'lokasi',                  // Activity location
+        'id_semester',             // Period code
+        'nama_semester',           // Period name
+        'keterangan',              // Activity description
+        'sk_tugas',                // Assignment decree number
+        'tanggal_sk_tugas',        // Assignment decree date
+        'untuk_kampus_merdeka',    // MBKM flag
+        'tanggal_mulai',           // Start date
+        'tanggal_selesai',         // End date
     ];
 
     protected $casts = [
-        'apakah_mbkm' => 'boolean',
+        'untuk_kampus_merdeka' => 'boolean',
+        'tanggal_sk_tugas' => 'date',
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
     ];
 
     /**
@@ -38,13 +50,5 @@ class LprAktivitasMahasiswa extends Model
     public function institusi(): BelongsTo
     {
         return $this->belongsTo(Institusi::class);
-    }
-
-    /**
-     * Get the mahasiswa that owns the aktivitas.
-     */
-    public function mahasiswa(): BelongsTo
-    {
-        return $this->belongsTo(Mahasiswa::class);
     }
 }

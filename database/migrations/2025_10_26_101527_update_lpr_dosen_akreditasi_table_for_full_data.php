@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('sk_jabatan_fungsional', 100)->nullable()->after('jabatan_fungsional_saat_ini');
             $table->date('tanggal_sk_jabatan_fungsional')->nullable()->after('sk_jabatan_fungsional');
 
-            // Add columns untuk sertifikasi (dari GetRiwayatSertifikasiDosen)  
+            // Add columns untuk sertifikasi (dari GetRiwayatSertifikasiDosen)
             $table->boolean('sudah_sertifikasi_dosen')->default(false)->after('tanggal_sk_jabatan_fungsional');
             $table->year('tahun_sertifikasi_dosen')->nullable()->after('sudah_sertifikasi_dosen');
             $table->string('sk_sertifikasi_dosen', 50)->nullable()->after('tahun_sertifikasi_dosen');
@@ -79,7 +79,7 @@ return new class extends Migration
                 'bidang_sertifikasi_dosen',
                 'jenjang_pendidikan_tertinggi',
                 'kesesuaian_bidang_ilmu',
-                'status_dosen'
+                'status_dosen',
             ]);
 
             // Add back old columns

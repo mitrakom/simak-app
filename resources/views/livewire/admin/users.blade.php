@@ -43,9 +43,7 @@ $filteredUsers = computed(function () {
                 />
             </div>
             <x-button variant="primary">
-                <svg class="size-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
+                <x-icon name="plus" size="5" class="mr-2" />
                 Add User
             </x-button>
         </div>
@@ -102,14 +100,10 @@ $filteredUsers = computed(function () {
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <x-button variant="secondary" size="sm" :outline="true">
-                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
+                                            <x-icon name="pencil" size="4" />
                                         </x-button>
                                         <x-button variant="danger" size="sm" :outline="true">
-                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
+                                            <x-icon name="trash" size="4" />
                                         </x-button>
                                     </div>
                                 </td>
@@ -118,9 +112,7 @@ $filteredUsers = computed(function () {
                             <tr>
                                 <td colspan="4" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center gap-2">
-                                        <svg class="size-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                        </svg>
+                                        <x-icon name="inbox" size="12" class="text-gray-400" />
                                         <p class="text-sm text-gray-500 dark:text-gray-400">No users found</p>
                                     </div>
                                 </td>
@@ -136,9 +128,7 @@ $filteredUsers = computed(function () {
             <x-card>
                 <div class="flex items-center gap-4">
                     <div class="size-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg class="size-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+                        <x-icon name="user-group" size="6" class="text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
@@ -150,9 +140,7 @@ $filteredUsers = computed(function () {
             <x-card>
                 <div class="flex items-center gap-4">
                     <div class="size-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg class="size-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <x-icon name="check-circle" size="6" class="text-green-600 dark:text-green-400" />
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Active Users</p>
@@ -164,9 +152,7 @@ $filteredUsers = computed(function () {
             <x-card>
                 <div class="flex items-center gap-4">
                     <div class="size-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg class="size-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+                        <x-icon name="exclamation" size="6" class="text-yellow-600 dark:text-yellow-400" />
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Inactive Users</p>

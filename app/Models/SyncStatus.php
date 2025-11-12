@@ -18,7 +18,7 @@ class SyncStatus extends Model
         'progress_message',
         'error_message',
         'last_sync_time',
-        'sync_process_id'
+        'sync_process_id',
     ];
 
     protected $casts = [
@@ -27,7 +27,7 @@ class SyncStatus extends Model
         'current_progress' => 'integer',
         'last_sync_time' => 'datetime',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -53,7 +53,7 @@ class SyncStatus extends Model
             'bimbingan_ta' => 'Bimbingan TA',
             'lulusan' => 'Data Lulusan',
             'aktivitas_mahasiswa' => 'Aktivitas Mahasiswa',
-            'dosen_akreditasi' => 'Dosen Akreditasi'
+            'dosen_akreditasi' => 'Dosen Akreditasi',
         ];
 
         $statuses = [];
@@ -74,7 +74,7 @@ class SyncStatus extends Model
                 'bimbingan_ta' => '📚',
                 'lulusan' => '👔',
                 'aktivitas_mahasiswa' => '📋',
-                'dosen_akreditasi' => '🔍'
+                'dosen_akreditasi' => '🔍',
             ];
 
             $statuses[] = [
@@ -87,7 +87,7 @@ class SyncStatus extends Model
                 'current_progress' => $status?->current_progress ?? 0,
                 'progress_message' => $status?->progress_message,
                 'error_message' => $status?->error_message,
-                'sync_process_id' => $status?->sync_process_id
+                'sync_process_id' => $status?->sync_process_id,
             ];
         }
 
@@ -104,7 +104,7 @@ class SyncStatus extends Model
             ->orderByDesc('created_at')
             ->first();
 
-        if (!$status) {
+        if (! $status) {
             return null;
         }
 
@@ -118,7 +118,7 @@ class SyncStatus extends Model
             'bimbingan_ta' => 'Bimbingan TA',
             'lulusan' => 'Data Lulusan',
             'aktivitas_mahasiswa' => 'Aktivitas Mahasiswa',
-            'dosen_akreditasi' => 'Dosen Akreditasi'
+            'dosen_akreditasi' => 'Dosen Akreditasi',
         ];
 
         $icons = [
@@ -131,7 +131,7 @@ class SyncStatus extends Model
             'bimbingan_ta' => '📚',
             'lulusan' => '👔',
             'aktivitas_mahasiswa' => '📋',
-            'dosen_akreditasi' => '🔍'
+            'dosen_akreditasi' => '🔍',
         ];
 
         return [
@@ -144,7 +144,7 @@ class SyncStatus extends Model
             'current_progress' => $status->current_progress,
             'progress_message' => $status->progress_message,
             'error_message' => $status->error_message,
-            'sync_process_id' => $status->sync_process_id
+            'sync_process_id' => $status->sync_process_id,
         ];
     }
 }

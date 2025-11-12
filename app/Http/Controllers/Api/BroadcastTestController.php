@@ -34,19 +34,19 @@ class BroadcastTestController
                     'cluster' => config('broadcasting.connections.pusher.options.cluster'),
                     'encrypted' => config('broadcasting.connections.pusher.options.encrypted'),
                 ],
-                'channel_info' => $result
+                'channel_info' => $result,
             ]);
         } catch (\Exception $e) {
             Log::error('Pusher connection test failed', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
                 'status' => 'error',
                 'message' => 'Pusher connection failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -58,7 +58,7 @@ class BroadcastTestController
         $message = $request->input('message', 'Test broadcast message');
 
         try {
-            $syncProcessId = 'test-' . time();
+            $syncProcessId = 'test-'.time();
 
             // Trigger event
             event(new SyncProgressUpdated($progress, $message, $syncProcessId, $institusiId));
@@ -67,7 +67,7 @@ class BroadcastTestController
                 'institusi_id' => $institusiId,
                 'progress' => $progress,
                 'message' => $message,
-                'sync_process_id' => $syncProcessId
+                'sync_process_id' => $syncProcessId,
             ]);
 
             return response()->json([
@@ -80,22 +80,22 @@ class BroadcastTestController
                     'sync_process_id' => $syncProcessId,
                     'channels' => [
                         "private-sync-process.{$syncProcessId}",
-                        "private-institusi-sync.{$institusiId}"
+                        "private-institusi-sync.{$institusiId}",
                     ],
-                    'timestamp' => now()->toISOString()
-                ]
+                    'timestamp' => now()->toISOString(),
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Test broadcast event failed', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
                 'status' => 'error',
                 'message' => 'Broadcast event failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -121,7 +121,7 @@ class BroadcastTestController
                 'PUSHER_APP_KEY' => env('PUSHER_APP_KEY'),
                 'PUSHER_APP_SECRET' => env('PUSHER_APP_SECRET') ? '***hidden***' : 'NOT SET',
                 'PUSHER_APP_CLUSTER' => env('PUSHER_APP_CLUSTER'),
-            ]
+            ],
         ]);
     }
 }

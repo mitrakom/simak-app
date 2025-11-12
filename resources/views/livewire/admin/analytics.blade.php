@@ -412,9 +412,7 @@ $userGrowthData = computed(fn () => [
         <!-- Info Box -->
         <x-alert variant="info">
             <div class="flex items-start gap-3">
-                <svg class="size-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <x-icon name="info" size="5" class="mt-0.5 flex-shrink-0" />
                 <div class="flex-1">
                     <h4 class="font-semibold mb-1">Chart.js Integration with Livewire</h4>
                     <p class="text-sm">Charts menggunakan Alpine.js untuk inisialisasi dan Chart.js CDN untuk rendering. Data di-inject dari Livewire menggunakan <code class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/50 rounded text-xs">Js::from()</code> untuk konversi PHP → JavaScript yang aman. Period filter akan memuat ulang chart dengan data yang berbeda.</p>

@@ -24,7 +24,7 @@ class InstitusiScope implements Scope
         $user = Auth::user();
 
         if ($user && $user->institusi_id) {
-            $builder->where($model->getTable() . '.institusi_id', $user->institusi_id);
+            $builder->where($model->getTable().'.institusi_id', $user->institusi_id);
         }
     }
 }

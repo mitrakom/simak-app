@@ -5,22 +5,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SyncAkademikMahasiswaJob;
+use App\Jobs\SyncAktivitasMahasiswaJob;
+use App\Jobs\SyncBimbinganTaJob;
+use App\Jobs\SyncDosenAkreditasiJob;
+use App\Jobs\SyncDosenJob;
+use App\Jobs\SyncLulusanJob;
+use App\Jobs\SyncMahasiswaJob;
+use App\Jobs\SyncPrestasiMahasiswaJob;
+use App\Jobs\SyncProdiJob;
 use App\Models\Institusi;
 use App\Models\SyncBatchProgress;
-use App\Jobs\SyncProdiJob;
-use App\Jobs\SyncDosenJob;
-use App\Jobs\SyncMahasiswaJob;
-use App\Jobs\SyncAkademikMahasiswaJob;
-use App\Jobs\SyncLulusanJob;
-use App\Jobs\SyncDosenAkreditasiJob;
-use App\Jobs\SyncBimbinganTaJob;
-use App\Jobs\SyncPrestasiMahasiswaJob;
-use App\Jobs\SyncAktivitasMahasiswaJob;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 
 class SyncManagementController extends Controller
 {
@@ -281,8 +279,9 @@ class SyncManagementController extends Controller
         $institusiModel = Institusi::where('slug', $institusi)->firstOrFail();
         $syncJobs = $this->getSyncJobsConfig();
 
-        if (!isset($syncJobs[$jobKey])) {
+        if (! isset($syncJobs[$jobKey])) {
             Log::warning('Job key not found', ['jobKey' => $jobKey]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Job tidak ditemukan',
@@ -311,7 +310,7 @@ class SyncManagementController extends Controller
             $jobArgs = [$institusiModel->id, $syncProcessId];
 
             // Add parameters if job has them
-            if ($jobConfig['has_parameters'] && !empty($parameters)) {
+            if ($jobConfig['has_parameters'] && ! empty($parameters)) {
                 foreach ($jobConfig['parameters'] as $paramKey => $paramConfig) {
                     $value = $parameters[$paramKey] ?? $paramConfig['default'];
 
@@ -350,7 +349,7 @@ class SyncManagementController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menjadwalkan job: ' . $e->getMessage(),
+                'message' => 'Gagal menjadwalkan job: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -415,14 +414,14 @@ class SyncManagementController extends Controller
                 'message' => 'Job berhasil dibatalkan',
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to cancel job", [
+            Log::error('Failed to cancel job', [
                 'batch_id' => $batchId,
                 'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membatalkan job: ' . $e->getMessage(),
+                'message' => 'Gagal membatalkan job: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -447,14 +446,14 @@ class SyncManagementController extends Controller
                 'message' => 'Riwayat sinkronisasi berhasil dihapus',
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to delete sync record", [
+            Log::error('Failed to delete sync record', [
                 'batch_id' => $batchId,
                 'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus riwayat: ' . $e->getMessage(),
+                'message' => 'Gagal menghapus riwayat: '.$e->getMessage(),
             ], 500);
         }
     }

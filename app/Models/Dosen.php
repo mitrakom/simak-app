@@ -22,11 +22,11 @@ class Dosen extends Model
      */
     protected $fillable = [
         'institusi_id',
-        'feeder_id',
+        'id_dosen', // Renamed to match API field exactly
         'nidn',
         'nuptk',
         'nip',
-        'nama',
+        'nama_dosen', // Renamed to match API field exactly
         'jenis_kelamin',
         'id_agama',
         'nama_agama',

@@ -22,10 +22,10 @@ class BatchProgressController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User tidak memiliki institusi'
+                    'message' => 'User tidak memiliki institusi',
                 ], 422);
             }
 
@@ -35,23 +35,23 @@ class BatchProgressController extends Controller
                 ->orderByDesc('created_at')
                 ->first();
 
-            if (!$progress) {
+            if (! $progress) {
                 return response()->json([
                     'status' => 'success',
                     'data' => null,
-                    'message' => 'No batch progress found for this sync type'
+                    'message' => 'No batch progress found for this sync type',
                 ], 200);
             }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $this->formatProgress($progress)
+                'data' => $this->formatProgress($progress),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to get batch progress',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -66,10 +66,10 @@ class BatchProgressController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User tidak memiliki institusi'
+                    'message' => 'User tidak memiliki institusi',
                 ], 422);
             }
 
@@ -77,23 +77,23 @@ class BatchProgressController extends Controller
                 ->where('batch_id', $batchId)
                 ->first();
 
-            if (!$progress) {
+            if (! $progress) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Batch progress not found',
-                    'error' => 'batch_not_found'
+                    'error' => 'batch_not_found',
                 ], 404);
             }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $this->formatProgress($progress)
+                'data' => $this->formatProgress($progress),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to get batch progress',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -108,10 +108,10 @@ class BatchProgressController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User tidak memiliki institusi'
+                    'message' => 'User tidak memiliki institusi',
                 ], 422);
             }
 
@@ -123,14 +123,14 @@ class BatchProgressController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => $batches->map(fn($batch) => $this->formatProgress($batch))->toArray(),
-                'total' => $batches->count()
+                'data' => $batches->map(fn ($batch) => $this->formatProgress($batch))->toArray(),
+                'total' => $batches->count(),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to get batch history',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -145,10 +145,10 @@ class BatchProgressController extends Controller
             $user = Auth::user();
             $institusi = $user->institusi;
 
-            if (!$institusi) {
+            if (! $institusi) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User tidak memiliki institusi'
+                    'message' => 'User tidak memiliki institusi',
                 ], 422);
             }
 
@@ -156,10 +156,10 @@ class BatchProgressController extends Controller
                 ->where('batch_id', $batchId)
                 ->first();
 
-            if (!$progress) {
+            if (! $progress) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Batch progress not found'
+                    'message' => 'Batch progress not found',
                 ], 404);
             }
 
@@ -167,13 +167,13 @@ class BatchProgressController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $this->formatProgress($progress),
-                'cache_bust' => now()->timestamp
+                'cache_bust' => now()->timestamp,
             ], 200)->header('Cache-Control', 'no-cache, no-store, must-revalidate');
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to poll batch progress',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -193,7 +193,7 @@ class BatchProgressController extends Controller
                 'processed' => $progress->processed_records,
                 'total' => $progress->total_records,
                 'failed' => $progress->failed_records,
-                'remaining' => $progress->total_records - $progress->processed_records
+                'remaining' => $progress->total_records - $progress->processed_records,
             ],
             'summary' => $progress->summary,
             'error_message' => $progress->error_message,
@@ -202,7 +202,7 @@ class BatchProgressController extends Controller
             'duration_seconds' => $progress->completed_at
                 ? $progress->completed_at->diffInSeconds($progress->started_at)
                 : null,
-            'created_at' => $progress->created_at->toIso8601String()
+            'created_at' => $progress->created_at->toIso8601String(),
         ];
     }
 }

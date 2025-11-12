@@ -25,7 +25,7 @@ class SyncBatchProgress extends Model
         'error_message',
         'summary',
         'started_at',
-        'completed_at'
+        'completed_at',
     ];
 
     protected $casts = [
@@ -40,7 +40,7 @@ class SyncBatchProgress extends Model
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -64,7 +64,7 @@ class SyncBatchProgress extends Model
         $this->error_count = $failed;
 
         if ($this->total_records > 0) {
-            $this->progress_percentage = (int)round(($processed / $this->total_records) * 100);
+            $this->progress_percentage = (int) round(($processed / $this->total_records) * 100);
         }
 
         $this->save();
@@ -113,6 +113,19 @@ class SyncBatchProgress extends Model
     }
 
     /**
+     * Mark batch as cancelled
+     */
+    public function markCancelled(string $reason = 'Dibatalkan oleh pengguna'): self
+    {
+        $this->status = 'cancelled';
+        $this->error_message = $reason;
+        $this->completed_at = now();
+        $this->save();
+
+        return $this;
+    }
+
+    /**
      * Get human-readable status with icon
      */
     public function getStatusWithIcon(): array
@@ -122,7 +135,7 @@ class SyncBatchProgress extends Model
             'processing' => '🔄',
             'completed' => '✅',
             'failed' => '❌',
-            'cancelled' => '⊘'
+            'cancelled' => '⊘',
         ];
 
         $labels = [
@@ -130,13 +143,13 @@ class SyncBatchProgress extends Model
             'processing' => 'Memproses',
             'completed' => 'Selesai',
             'failed' => 'Gagal',
-            'cancelled' => 'Dibatalkan'
+            'cancelled' => 'Dibatalkan',
         ];
 
         return [
             'status' => $this->status,
             'label' => $labels[$this->status] ?? $this->status,
-            'icon' => $icons[$this->status] ?? '📌'
+            'icon' => $icons[$this->status] ?? '📌',
         ];
     }
 }

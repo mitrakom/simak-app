@@ -33,9 +33,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                 color="blue"
             >
                 <x-slot name="icon">
-                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
+                    <x-icon name="users" size="6" />
                 </x-slot>
             </x-stat-card>
 
@@ -47,9 +45,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                 color="green"
             >
                 <x-slot name="icon">
-                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
+                    <x-icon name="clipboard-list" size="6" />
                 </x-slot>
             </x-stat-card>
 
@@ -61,9 +57,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                 color="purple"
             >
                 <x-slot name="icon">
-                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <x-icon name="currency-dollar" size="6" />
                 </x-slot>
             </x-stat-card>
 
@@ -75,9 +69,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                 color="pink"
             >
                 <x-slot name="icon">
-                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
+                    <x-icon name="cube" size="6" />
                 </x-slot>
             </x-stat-card>
         </div>
@@ -90,9 +82,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
                             <div class="size-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="size-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
+                                <x-icon name="shopping-bag" size="5" class="text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">Order #1234</p>
@@ -108,9 +98,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
                             <div class="size-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="size-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
+                                <x-icon name="shopping-bag" size="5" class="text-green-600 dark:text-green-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">Order #1233</p>
@@ -126,9 +114,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                     <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
                             <div class="size-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="size-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
+                                <x-icon name="shopping-bag" size="5" class="text-purple-600 dark:text-purple-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">Order #1232</p>
@@ -144,9 +130,7 @@ $productGrowth = computed(fn() => '+5.1% from last month');
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="size-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="size-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
+                                <x-icon name="shopping-bag" size="5" class="text-pink-600 dark:text-pink-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">Order #1231</p>

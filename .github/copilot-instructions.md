@@ -5,6 +5,86 @@
 
 The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to enhance the user's satisfaction building Laravel applications.
 
+## Project-Specific Guidelines
+
+### Team Background & Preferences
+- The development team has a **Bootstrap CSS background** and is still learning **Tailwind CSS**.
+- Prioritize code simplicity and reusability to help the team understand and maintain the codebase.
+- When making UI changes, provide brief explanations of Tailwind utility classes when they differ significantly from Bootstrap approaches.
+
+### Form Components (Critical)
+- **Always use existing Blade components** when creating forms instead of writing raw HTML with Tailwind classes.
+- Check `resources/views/components/` directory for available components before creating new ones:
+  - `<x-input>` - Text input fields
+  - `<x-select>` - Dropdown/select fields
+  - `<x-textarea>` - Textarea fields
+  - `<x-button>` - Buttons (primary, secondary, danger, etc.)
+  - `<x-card>` - Card containers
+  - `<x-badge>` - Status badges
+  - `<x-alert>` - Alert messages
+  - `<x-stat-card>` - Statistics display cards
+  - `<x-icon>` - SVG icons (39 icons available)
+  - `<x-sync.*>` - Synchronization components (status-badge, progress-bar, stat-card)
+- **Component flexibility**: You may edit existing components to add new features or variants, but ensure:
+  - Components remain flexible and reusable
+  - Components maintain simplicity (no over-engineering)
+  - Default behavior is preserved unless explicitly changed
+  - New props/attributes are optional and well-documented with inline comments
+
+### Icon Component (Critical)
+- **NEVER use inline SVG** - always use the centralized `<x-icon>` component
+- **Icon component location**: `resources/views/components/icon.blade.php`
+- **Available icons**: 39 icons across 5 categories:
+  - Common (13): refresh, check-circle, x-circle, spinner, chevron-down, clipboard, clock, cog, chart, check, x, exclamation, info
+  - Dashboard (3): shopping-bag, currency-dollar, cube
+  - Action (4): plus, pencil, trash, inbox
+  - Job/Data (10): academic-cap, users, book-open, user-group, clipboard-list, trophy, document-text, shield-check, beaker
+  - Navigation (11): menu-bars, search, sun, moon, bell, user, logout, home, database, arrow-right, document-chart
+- **Usage patterns**:
+  ```blade
+  <!-- Basic usage -->
+  <x-icon name="refresh" size="5" />
+  
+  <!-- With custom classes -->
+  <x-icon name="user" size="5" class="text-blue-600 dark:text-blue-400" />
+  
+  <!-- With Alpine.js directives -->
+  <x-icon name="sun" size="5" x-show="darkMode" />
+  <x-icon name="moon" size="5" x-show="!darkMode" />
+  ```
+- **Available sizes**: `size="3"`, `size="4"`, `size="5"` (default), `size="6"`, `size="8"`
+- **Adding new icons**: Add to `$icons` array in `icon.blade.php` component
+
+### Code Refactoring Best Practices
+- **Replace inline SVG with icon component**: Use `<x-icon>` instead of copy-pasting SVG code
+- **Extract repeated patterns into components**: If you see similar HTML blocks 3+ times, create a component
+- **Keep backups**: Create `.backup` files before major refactoring (e.g., `navbar.blade.php.backup`)
+- **Run Pint after changes**: Always run `vendor/bin/pint --dirty` after editing Blade files
+- **Document refactoring**: Update or create documentation in `docs/features/` for significant refactoring
+- **Check for existing components first**: Before creating new components, search `resources/views/components/` directory
+
+### Testing Organization
+- **Manual tests** (user-driven test scenarios, exploratory testing notes) go in `tests/Manual/` directory
+- **Automated tests** (Pest/PHPUnit) remain in `tests/Feature/` and `tests/Unit/` directories
+- Manual test files should be markdown format describing test steps, expected results, and actual results
+
+### Documentation Organization
+- **All documentation** must be created in the `docs/` directory
+- Use clear, hierarchical structure within `docs/`:
+  - `docs/setup/` - Installation and configuration guides
+  - `docs/features/` - Feature documentation
+  - `docs/api/` - API documentation
+  - `docs/architecture/` - System architecture and design decisions
+  - `docs/deployment/` - Deployment and DevOps guides
+- Documentation files must be in **Markdown format**
+- Include code examples and screenshots where applicable
+- Keep documentation up-to-date when making related code changes
+
+### Directory Structure Rules
+- **Never create** `tests/Manual/` or `docs/` subdirectories without user approval for new categories
+- **Always check** if similar documentation/manual tests exist before creating new files
+- Follow existing naming conventions in each directory
+
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
@@ -12,7 +92,6 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
 - livewire/livewire (LIVEWIRE) - v3
-- livewire/volt (VOLT) - v1
 - laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
@@ -32,8 +111,53 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - Stick to existing directory structure - don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
+## Docker Environment (Critical)
+- **This project runs on Docker** - all commands must be executed inside Docker containers
+- **Never run commands directly** on host machine (e.g., `npm run build`, `php artisan`, `composer`)
+- **Always use Docker Compose** to execute commands in appropriate containers
+
+### Docker Command Patterns
+
+**Frontend/Node Commands:**
+```bash
+# ❌ WRONG - Don't run on host
+npm run build
+npm run dev
+npm install
+
+# ✅ CORRECT - Run in Docker node container
+docker compose exec node npm run build
+docker compose exec node npm run dev
+docker compose exec node npm install
+```
+
+**PHP/Artisan Commands:**
+```bash
+# ❌ WRONG
+php artisan migrate
+composer install
+
+# ✅ CORRECT - Run in Docker app container
+docker compose exec app php artisan migrate
+docker compose exec app composer install
+```
+
+**When to Rebuild Assets:**
+- After modifying Blade files with new Tailwind classes
+- After adding/removing components
+- After changing JavaScript/CSS in `resources/` folder
+- When you see "Vite manifest" errors
+- **Command:** `docker compose exec node npm run build`
+
+### Available Docker Services
+- `app` - PHP-FPM container (Laravel application)
+- `web` - Nginx container (web server)
+- `node` - Node.js container (frontend build tools)
+
 ## Frontend Bundling
-- If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
+- If the user doesn't see a frontend change reflected in the UI, run `docker compose exec node npm run build`
+- For development with auto-reload: `docker compose exec node npm run dev`
+- All npm commands must run inside Docker `node` container
 
 ## Replies
 - Be concise in your explanations - focus on what's important rather than explaining obvious details.
@@ -154,7 +278,8 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - When creating tests, make use of `php artisan make:test [options] <name>` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
 
 ### Vite Error
-- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, run `docker compose exec node npm run build` to rebuild assets.
+- For development with auto-reload, use `docker compose exec node npm run dev`.
 
 
 === laravel/v12 rules ===
@@ -230,6 +355,56 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Livewire 3
 
+### Component Structure
+- This project uses **Class-based Livewire components** (NOT Volt).
+- All Livewire components must be created as separate PHP class files in `app/Livewire/` directory.
+- Component views must be in `resources/views/livewire/` directory.
+- Use `php artisan make:livewire ComponentName` to create new components.
+
+### Class-based Component Example
+
+<code-snippet name="Standard Livewire Component Class" lang="php">
+<?php
+
+namespace App\Livewire;
+
+use Livewire\Component;
+
+class Counter extends Component
+{
+    public int $count = 0;
+
+    public function increment(): void
+    {
+        $this->count++;
+    }
+
+    public function decrement(): void
+    {
+        $this->count--;
+    }
+
+    public function render()
+    {
+        return view('livewire.counter');
+    }
+}
+</code-snippet>
+
+<code-snippet name="Component View (resources/views/livewire/counter.blade.php)" lang="blade">
+<div>
+    <h1>Count: {{ $count }}</h1>
+    <button wire:click="increment">+</button>
+    <button wire:click="decrement">-</button>
+</div>
+</code-snippet>
+
+### Component Conventions
+- Class name must be in PascalCase (e.g., `CreatePost`, `UserSettings`)
+- File location: `app/Livewire/CreatePost.php`
+- View location: `resources/views/livewire/create-post.blade.php`
+- Namespace: `App\Livewire`
+
 ### Key Changes From Livewire 2
 - These things changed in Livewire 2, but may not have been updated in this application. Verify this application's setup to ensure you conform with application conventions.
     - Use `wire:model.live` for real-time updates, `wire:model` is now deferred by default.
@@ -243,6 +418,31 @@ protected function isAccessible(User $user, ?string $path = null): bool
 ### Alpine
 - Alpine is now included with Livewire, don't manually include Alpine.js.
 - Plugins included with Alpine: persist, intersect, collapse, and focus.
+
+### Alpine.js with Blade (Critical)
+- **NEVER use curly braces `{}` in Alpine.js `:class` directive** - Blade will fail to parse it
+- **Use ternary operator instead** for conditional classes
+
+**❌ WRONG - Will cause syntax error**:
+```blade
+<x-icon name="chevron-down" :class="{ 'rotate-180': isOpen }" />
+```
+
+**✅ CORRECT - Use ternary operator**:
+```blade
+<div :class="isOpen ? 'rotate-180' : ''">
+    <x-icon name="chevron-down" />
+</div>
+```
+
+**✅ ALTERNATIVE - Wrap icon in div with Alpine directive**:
+```blade
+<div class="transition-transform" :class="isOpen ? 'rotate-180' : ''">
+    <x-icon name="chevron-down" size="4" />
+</div>
+```
+
+**Why**: Blade uses curly braces for its own syntax (`{{ }}`, `{!! !!}`), so Alpine's object syntax `{ key: value }` conflicts and causes parse errors.
 
 ### Lifecycle Hooks
 - You can listen for `livewire:init` to hook into Livewire initialization, and `fail.status === 419` for the page expiring:
@@ -261,137 +461,175 @@ document.addEventListener('livewire:init', function () {
 });
 </code-snippet>
 
+### Component Properties & Methods
+- Use public properties for reactive state
+- Use `#[Locked]` attribute for properties that shouldn't be modified from the frontend
+- Use computed properties with the `#[Computed]` attribute for derived state
+- Lifecycle hooks: `mount()`, `hydrate()`, `updated($property)`, `updatedPropertyName()`
 
-=== volt/core rules ===
+<code-snippet name="Livewire Properties Example" lang="php">
+use Livewire\Attributes\{Computed, Locked};
 
-## Livewire Volt
-
-- This project uses Livewire Volt for interactivity within its pages. New pages requiring interactivity must also use Livewire Volt. There is documentation available for it.
-- Make new Volt components using `php artisan make:volt [name] [--test] [--pest]`
-- Volt is a **class-based** and **functional** API for Livewire that supports single-file components, allowing a component's PHP logic and Blade templates to co-exist in the same file
-- Livewire Volt allows PHP logic and Blade templates in one file. Components use the `@volt` directive.
-- You must check existing Volt components to determine if they're functional or class based. If you can't detect that, ask the user which they prefer before writing a Volt component.
-
-### Volt Functional Component Example
-
-<code-snippet name="Volt Functional Component Example" lang="php">
-@volt
-<?php
-use function Livewire\Volt\{state, computed};
-
-state(['count' => 0]);
-
-$increment = fn () => $this->count++;
-$decrement = fn () => $this->count--;
-
-$double = computed(fn () => $this->count * 2);
-?>
-
-<div>
-    <h1>Count: {{ $count }}</h1>
-    <h2>Double: {{ $this->double }}</h2>
-    <button wire:click="increment">+</button>
-    <button wire:click="decrement">-</button>
-</div>
-@endvolt
-</code-snippet>
-
-
-### Volt Class Based Component Example
-To get started, define an anonymous class that extends Livewire\Volt\Component. Within the class, you may utilize all of the features of Livewire using traditional Livewire syntax:
-
-
-<code-snippet name="Volt Class-based Volt Component Example" lang="php">
-use Livewire\Volt\Component;
-
-new class extends Component {
-    public $count = 0;
-
-    public function increment()
+class UserProfile extends Component
+{
+    public string $name = '';
+    
+    #[Locked]
+    public int $userId;
+    
+    public function mount(int $userId): void
     {
-        $this->count++;
+        $this->userId = $userId;
+        $this->name = User::find($userId)->name;
     }
-} ?>
-
-<div>
-    <h1>{{ $count }}</h1>
-    <button wire:click="increment">+</button>
-</div>
+    
+    #[Computed]
+    public function user()
+    {
+        return User::find($this->userId);
+    }
+    
+    public function updatedName(): void
+    {
+        // Called when $name is updated
+        $this->validate(['name' => 'required|min:3']);
+    }
+}
 </code-snippet>
 
 
-### Testing Volt & Volt Components
-- Use the existing directory for tests if it already exists. Otherwise, fallback to `tests/Feature/Volt`.
+=== livewire/testing rules ===
 
-<code-snippet name="Livewire Test Example" lang="php">
-use Livewire\Volt\Volt;
+## Testing Livewire Components
+
+- Test Livewire components using Pest in `tests/Feature/Livewire/` directory
+- Use `Livewire::test()` to test components
+
+<code-snippet name="Basic Livewire Component Test" lang="php">
+use App\Livewire\Counter;
+use Livewire\Livewire;
 
 test('counter increments', function () {
-    Volt::test('counter')
-        ->assertSee('Count: 0')
+    Livewire::test(Counter::class)
+        ->assertSet('count', 0)
         ->call('increment')
+        ->assertSet('count', 1)
         ->assertSee('Count: 1');
 });
 </code-snippet>
 
+<code-snippet name="Testing Component With Form" lang="php">
+use App\Livewire\CreatePost;
+use App\Models\{User, Post};
+use Livewire\Livewire;
 
-<code-snippet name="Volt Component Test Using Pest" lang="php">
-declare(strict_types=1);
-
-use App\Models\{User, Product};
-use Livewire\Volt\Volt;
-
-test('product form creates product', function () {
+test('creates post successfully', function () {
     $user = User::factory()->create();
 
-    Volt::test('pages.products.create')
-        ->actingAs($user)
-        ->set('form.name', 'Test Product')
-        ->set('form.description', 'Test Description')
-        ->set('form.price', 99.99)
-        ->call('create')
-        ->assertHasNoErrors();
+    Livewire::actingAs($user)
+        ->test(CreatePost::class)
+        ->set('title', 'Test Post')
+        ->set('content', 'Test Content')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertDispatched('post-created');
 
-    expect(Product::where('name', 'Test Product')->exists())->toBeTrue();
+    expect(Post::where('title', 'Test Post')->exists())->toBeTrue();
+});
+</code-snippet>
+
+<code-snippet name="Testing Component On Page" lang="php">
+test('post creation page shows livewire component', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get('/posts/create')
+        ->assertSeeLivewire(CreatePost::class);
 });
 </code-snippet>
 
 
-### Common Patterns
+=== livewire/patterns rules ===
 
+## Common Livewire Patterns
 
-<code-snippet name="CRUD With Volt" lang="php">
-<?php
+### Real-Time Search
+<code-snippet name="Real-Time Search Pattern" lang="php">
+class SearchProducts extends Component
+{
+    public string $search = '';
 
-use App\Models\Product;
-use function Livewire\Volt\{state, computed};
+    public function render()
+    {
+        $products = Product::query()
+            ->when($this->search, fn($q) => 
+                $q->where('name', 'like', "%{$this->search}%")
+            )
+            ->get();
 
-state(['editing' => null, 'search' => '']);
-
-$products = computed(fn() => Product::when($this->search,
-    fn($q) => $q->where('name', 'like', "%{$this->search}%")
-)->get());
-
-$edit = fn(Product $product) => $this->editing = $product->id;
-$delete = fn(Product $product) => $product->delete();
-
-?>
-
-<!-- HTML / UI Here -->
+        return view('livewire.search-products', [
+            'products' => $products
+        ]);
+    }
+}
 </code-snippet>
 
-<code-snippet name="Real-Time Search With Volt" lang="php">
-    <flux:input
+<code-snippet name="Real-Time Search View" lang="blade">
+<div>
+    <input 
+        type="text" 
         wire:model.live.debounce.300ms="search"
-        placeholder="Search..."
-    />
+        placeholder="Search products..."
+    >
+    
+    <div wire:loading>Searching...</div>
+    
+    @foreach($products as $product)
+        <div wire:key="product-{{ $product->id }}">
+            {{ $product->name }}
+        </div>
+    @endforeach
+</div>
 </code-snippet>
 
-<code-snippet name="Loading States With Volt" lang="php">
-    <flux:button wire:click="save" wire:loading.attr="disabled">
-        <span wire:loading.remove>Save</span>
-        <span wire:loading>Saving...</span>
-    </flux:button>
+### Form Validation
+<code-snippet name="Form Validation Pattern" lang="php">
+class CreatePost extends Component
+{
+    public string $title = '';
+    public string $content = '';
+
+    protected function rules(): array
+    {
+        return [
+            'title' => 'required|min:3|max:255',
+            'content' => 'required|min:10',
+        ];
+    }
+
+    public function save(): void
+    {
+        $validated = $this->validate();
+
+        Post::create($validated);
+
+        $this->dispatch('post-created');
+        $this->reset();
+    }
+
+    public function updated($property): void
+    {
+        $this->validateOnly($property);
+    }
+}
+</code-snippet>
+
+### Loading States
+<code-snippet name="Loading States Pattern" lang="blade">
+<button wire:click="save" wire:loading.attr="disabled">
+    <span wire:loading.remove wire:target="save">Save Post</span>
+    <span wire:loading wire:target="save">Saving...</span>
+</button>
 </code-snippet>
 
 
@@ -525,6 +763,33 @@ $pages->assertNoJavascriptErrors()->assertNoConsoleLogs();
 
 ### Dark Mode
 - If existing pages and components support dark mode, new pages and components must support dark mode in a similar way, typically using `dark:`.
+
+### Dynamic Classes (Critical)
+- **NEVER use dynamic Tailwind classes** with string interpolation - Tailwind cannot compile them at build time
+- **Always use full class names** with PHP match expressions or conditional logic
+
+**❌ WRONG - Dynamic classes won't compile:**
+```blade
+<div class="bg-{{ $color }}-600">  <!-- Won't work -->
+<button class="text-{{ $job['color'] }}-500">  <!-- Won't work -->
+```
+
+**✅ CORRECT - Use match() for full class names:**
+```blade
+@php
+    $bgClass = match($color) {
+        'blue' => 'bg-blue-600',
+        'green' => 'bg-green-600',
+        'red' => 'bg-red-600',
+        default => 'bg-gray-600',
+    };
+@endphp
+<div class="{{ $bgClass }}">  <!-- Will compile correctly -->
+```
+
+**Why**: Tailwind's JIT compiler scans files at build time for complete class names. Partial strings like `bg-{{ $var }}-600` aren't recognized and won't be included in the compiled CSS.
+
+**After fixing dynamic classes**: Always rebuild assets with `docker compose exec node npm run build`
 
 
 === tailwindcss/v4 rules ===

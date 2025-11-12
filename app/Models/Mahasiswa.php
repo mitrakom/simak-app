@@ -23,9 +23,12 @@ class Mahasiswa extends Model
     protected $fillable = [
         'institusi_id',
         'prodi_id',
-        'feeder_id',
+        'mahasiswa_feeder_id', // id_mahasiswa from API
+        'registrasi_feeder_id', // id_registrasi_mahasiswa from API
+        'id_sms', // id_sms from API - periode registrasi
         'nim',
-        'nama',
+        'nipd',
+        'nama_mahasiswa', // Renamed from 'nama' to match API
         'angkatan',
         // From GetListMahasiswa
         'jenis_kelamin',
@@ -34,7 +37,7 @@ class Mahasiswa extends Model
         'nama_agama',
         'id_status_mahasiswa',
         'nama_status_mahasiswa',
-        'id_periode_masuk',
+        'id_periode', // Renamed from 'id_periode_masuk' to match API
         'nama_periode_masuk',
         'ipk',
         'total_sks',

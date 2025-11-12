@@ -60,7 +60,7 @@ return new class extends Migration
                 'email',
                 'handphone',
                 'nama_ibu_kandung',
-                'has_biodata_detail'
+                'has_biodata_detail',
             ]);
         });
     }

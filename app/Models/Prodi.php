@@ -15,12 +15,12 @@ class Prodi extends Model
 
     /**
      * The "booted" method of the model.
-     * 
+     *
      * Register global scope untuk multi-tenancy
      */
     protected static function booted(): void
     {
-        static::addGlobalScope(new InstitusiScope());
+        static::addGlobalScope(new InstitusiScope);
     }
 
     /**
@@ -30,11 +30,12 @@ class Prodi extends Model
      */
     protected $fillable = [
         'institusi_id',
-        'feeder_id',
-        'nama',
-        'kode',
-        'jenjang',
-        'status',
+        'id_prodi', // ID Prodi dari Feeder (id_prodi) - UUID
+        'kode_program_studi', // Kode program studi
+        'nama_program_studi', // Nama program studi
+        'status', // Status prodi (A = Aktif, dll)
+        'id_jenjang_pendidikan', // ID Jenjang (30 = S1, dll)
+        'nama_jenjang_pendidikan', // Nama jenjang (S1, S2, S3, dll)
     ];
 
     /**
