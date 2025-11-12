@@ -20,12 +20,15 @@ class LprPrestasiMahasiswa extends Model
     protected $fillable = [
         'institusi_id',
         'mahasiswa_id',
-        'mahasiswa_feeder_id',
-        'prestasi_feeder_id',
+        'id_mahasiswa',           // UUID from Feeder API
+        'id_prestasi',            // UUID from Feeder API
+        'jenis_prestasi',         // Type of achievement
+        'registrasi_feeder_id',   // Optional registration ID
         'nim',
         'nama_mahasiswa',
         'nama_prestasi',
-        'tingkat_prestasi',
+        'peringkat',              // Ranking/position achieved
+        'tingkat_prestasi',       // Level: Lokal/Nasional/Internasional/Wilayah
         'tahun_prestasi',
         'penyelenggara',
     ];
@@ -35,6 +38,7 @@ class LprPrestasiMahasiswa extends Model
      */
     protected $casts = [
         'tahun_prestasi' => 'integer',
+        'peringkat' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

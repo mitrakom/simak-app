@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -17,24 +18,38 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Safer approach: add new column id_semester, copy values from semester,
+        // create new unique index, then drop the old unique and old column.
         Schema::table('lpr_akademik_mahasiswa', function (Blueprint $table) {
-            // Drop unique constraint before renaming
-            $table->dropUnique('lpr_akademik_mhs_unique');
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'id_semester')) {
+                $table->string('id_semester', 5)->nullable()->after('semester');
+            }
         });
 
-        Schema::table('lpr_akademik_mahasiswa', function (Blueprint $table) {
-            // Rename columns to match API
-            $table->renameColumn('semester', 'id_semester');
-            $table->renameColumn('status_mahasiswa', 'nama_status_mahasiswa');
-            $table->renameColumn('nama_prodi', 'nama_program_studi');
-        });
+        // Copy data from semester into id_semester
+        DB::statement('UPDATE lpr_akademik_mahasiswa SET id_semester = semester');
 
         Schema::table('lpr_akademik_mahasiswa', function (Blueprint $table) {
-            // Add new fields from API
-            $table->string('nama_semester', 50)->nullable()->after('id_semester');
-            $table->string('id_status_mahasiswa', 10)->nullable()->after('nama_program_studi');
-            $table->decimal('biaya_kuliah_smt', 16, 2)->nullable()->after('sks_total');
-            $table->string('id_pembiayaan', 10)->nullable()->after('biaya_kuliah_smt');
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'nama_status_mahasiswa')) {
+                $table->renameColumn('status_mahasiswa', 'nama_status_mahasiswa');
+            }
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'nama_program_studi')) {
+                $table->renameColumn('nama_prodi', 'nama_program_studi');
+            }
+
+            // Add other new fields from API
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'nama_semester')) {
+                $table->string('nama_semester', 50)->nullable()->after('id_semester');
+            }
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'id_status_mahasiswa')) {
+                $table->string('id_status_mahasiswa', 10)->nullable()->after('nama_program_studi');
+            }
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'biaya_kuliah_smt')) {
+                $table->decimal('biaya_kuliah_smt', 16, 2)->nullable()->after('sks_total');
+            }
+            if (! Schema::hasColumn('lpr_akademik_mahasiswa', 'id_pembiayaan')) {
+                $table->string('id_pembiayaan', 10)->nullable()->after('biaya_kuliah_smt');
+            }
 
             // Update column types
             $table->string('id_semester', 5)->change();
@@ -42,10 +57,15 @@ return new class extends Migration
             $table->string('nama_program_studi', 200)->change();
         });
 
-        // Recreate unique constraint with new column name
-        Schema::table('lpr_akademik_mahasiswa', function (Blueprint $table) {
-            $table->unique(['institusi_id', 'registrasi_feeder_id', 'id_semester'], 'lpr_akademik_mhs_unique');
-        });
+        // Create new unique constraint on (institusi_id, registrasi_feeder_id, id_semester)
+        $indexes = DB::select("SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lpr_akademik_mahasiswa'");
+        $indexNames = array_map(fn($r) => $r->INDEX_NAME, $indexes);
+
+        if (! in_array('lpr_akademik_mhs_unique', $indexNames)) {
+            Schema::table('lpr_akademik_mahasiswa', function (Blueprint $table) {
+                $table->unique(['institusi_id', 'registrasi_feeder_id', 'id_semester'], 'lpr_akademik_mhs_unique');
+            });
+        }
     }
 
     /**

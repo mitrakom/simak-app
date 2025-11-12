@@ -29,38 +29,61 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Safer: add new id_anggota column, copy data from anggota_aktivitas_feeder_id,
+        // create new unique index, and keep old index in place to avoid FK issues.
         Schema::table('lpr_aktivitas_mahasiswa', function (Blueprint $table) {
-            // Drop old unique constraint
-            $table->dropUnique('lpr_aktivitas_mhs_unique');
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'id_anggota')) {
+                $table->uuid('id_anggota')->nullable()->after('anggota_aktivitas_feeder_id');
+            }
         });
 
-        // Rename columns to match API field names
+        // Copy existing values
+        DB::statement('UPDATE lpr_aktivitas_mahasiswa SET id_anggota = anggota_aktivitas_feeder_id');
+
+        // Rename other columns
         Schema::table('lpr_aktivitas_mahasiswa', function (Blueprint $table) {
-            $table->renameColumn('anggota_aktivitas_feeder_id', 'id_anggota');
-            $table->renameColumn('judul_aktivitas', 'judul');
-            $table->renameColumn('jenis_aktivitas', 'nama_jenis_aktivitas');
-            $table->renameColumn('peran_mahasiswa', 'nama_jenis_peran');
-            $table->renameColumn('semester', 'id_semester');
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'judul')) {
+                $table->renameColumn('judul_aktivitas', 'judul');
+            }
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'nama_jenis_aktivitas')) {
+                $table->renameColumn('jenis_aktivitas', 'nama_jenis_aktivitas');
+            }
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'nama_jenis_peran')) {
+                $table->renameColumn('peran_mahasiswa', 'nama_jenis_peran');
+            }
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'id_semester')) {
+                $table->renameColumn('semester', 'id_semester');
+            }
         });
 
         // Add new columns and update types
         Schema::table('lpr_aktivitas_mahasiswa', function (Blueprint $table) {
-            // Add missing API fields
-            $table->string('id_jenis_aktivitas', 10)->nullable()->after('nama_jenis_aktivitas')->comment('ID Jenis Aktivitas dari API');
-            $table->string('jenis_peran', 10)->nullable()->after('nama_jenis_peran')->comment('Kode Jenis Peran dari API');
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'id_jenis_aktivitas')) {
+                $table->string('id_jenis_aktivitas', 10)->nullable()->after('nama_jenis_aktivitas')->comment('ID Jenis Aktivitas dari API');
+            }
+            if (! Schema::hasColumn('lpr_aktivitas_mahasiswa', 'jenis_peran')) {
+                $table->string('jenis_peran', 10)->nullable()->after('nama_jenis_peran')->comment('Kode Jenis Peran dari API');
+            }
 
-            // Update column sizes to match API
             $table->string('judul', 500)->change();
             $table->string('nama_jenis_aktivitas', 100)->change();
             $table->string('nama_jenis_peran', 100)->nullable()->change();
             $table->string('id_semester', 5)->nullable()->change();
 
-            // Remove field that's not in member API
-            $table->dropColumn('apakah_mbkm');
-
-            // Recreate unique constraint with new column name
-            $table->unique(['institusi_id', 'id_anggota'], 'lpr_aktivitas_mhs_unique');
+            // Remove field that's not in member API if present
+            if (Schema::hasColumn('lpr_aktivitas_mahasiswa', 'apakah_mbkm')) {
+                $table->dropColumn('apakah_mbkm');
+            }
         });
+
+        // Create unique constraint on new column if not exists
+        $indexes = DB::select("SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lpr_aktivitas_mahasiswa'");
+        $indexNames = array_map(fn($r) => $r->INDEX_NAME, $indexes);
+        if (! in_array('lpr_aktivitas_mhs_unique', $indexNames)) {
+            Schema::table('lpr_aktivitas_mahasiswa', function (Blueprint $table) {
+                $table->unique(['institusi_id', 'id_anggota'], 'lpr_aktivitas_mhs_unique');
+            });
+        }
     }
 
     /**

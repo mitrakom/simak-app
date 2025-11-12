@@ -82,18 +82,23 @@ class SyncPrestasiMahasiswaRecordJob implements ShouldQueue
             // Check if prestasi already exists
             $existingRecord = LprPrestasiMahasiswa::where([
                 'institusi_id' => $this->institusi->id,
-                'prestasi_feeder_id' => $this->feederPrestasi['id_prestasi'],
+                'id_prestasi' => $this->feederPrestasi['id_prestasi'],
             ])->first();
 
             // Prepare record data
             $recordData = [
                 'institusi_id' => $this->institusi->id,
                 'mahasiswa_id' => $mahasiswa->id,
-                'mahasiswa_feeder_id' => $this->feederPrestasi['id_mahasiswa'],
-                'prestasi_feeder_id' => $this->feederPrestasi['id_prestasi'],
+                'id_mahasiswa' => $this->feederPrestasi['id_mahasiswa'],
+                'id_prestasi' => $this->feederPrestasi['id_prestasi'],
+                'jenis_prestasi' => $this->feederPrestasi['jenis_prestasi'] ?? null,
+                'registrasi_feeder_id' => $this->feederPrestasi['id_registrasi_mahasiswa'] ?? null,
                 'nim' => $mahasiswa->nim,
                 'nama_mahasiswa' => $this->feederPrestasi['nama_mahasiswa'] ?? $mahasiswa->nama,
                 'nama_prestasi' => $this->feederPrestasi['nama_prestasi'] ?? '',
+                'peringkat' => ! empty($this->feederPrestasi['peringkat'])
+                    ? (int) $this->feederPrestasi['peringkat']
+                    : null,
                 'tingkat_prestasi' => $this->feederPrestasi['nama_tingkat_prestasi'] ?? '',
                 'tahun_prestasi' => ! empty($this->feederPrestasi['tahun_prestasi'])
                     ? (int) $this->feederPrestasi['tahun_prestasi']
@@ -108,7 +113,7 @@ class SyncPrestasiMahasiswaRecordJob implements ShouldQueue
 
                     Log::debug('Prestasi mahasiswa updated', [
                         'id' => $existingRecord->id,
-                        'prestasi_feeder_id' => $this->feederPrestasi['id_prestasi'],
+                        'id_prestasi' => $this->feederPrestasi['id_prestasi'],
                         'mahasiswa' => $mahasiswa->nama,
                     ]);
 
@@ -121,7 +126,7 @@ class SyncPrestasiMahasiswaRecordJob implements ShouldQueue
                 LprPrestasiMahasiswa::create($recordData);
 
                 Log::debug('Prestasi mahasiswa created', [
-                    'prestasi_feeder_id' => $this->feederPrestasi['id_prestasi'],
+                    'id_prestasi' => $this->feederPrestasi['id_prestasi'],
                     'mahasiswa' => $mahasiswa->nama,
                 ]);
 
@@ -131,7 +136,7 @@ class SyncPrestasiMahasiswaRecordJob implements ShouldQueue
             }
         } catch (\Exception $e) {
             Log::error('Failed to sync prestasi mahasiswa record', [
-                'prestasi_feeder_id' => $this->feederPrestasi['id_prestasi'] ?? 'unknown',
+                'id_prestasi' => $this->feederPrestasi['id_prestasi'] ?? 'unknown',
                 'id_mahasiswa' => $this->feederPrestasi['id_mahasiswa'] ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -151,10 +156,13 @@ class SyncPrestasiMahasiswaRecordJob implements ShouldQueue
     {
         $fieldsToCheck = [
             'mahasiswa_id',
-            'mahasiswa_feeder_id',
+            'id_mahasiswa',
+            'jenis_prestasi',
+            'registrasi_feeder_id',
             'nim',
             'nama_mahasiswa',
             'nama_prestasi',
+            'peringkat',
             'tingkat_prestasi',
             'tahun_prestasi',
             'penyelenggara',

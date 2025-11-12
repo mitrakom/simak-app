@@ -268,7 +268,7 @@ class SyncController extends Controller
             }
 
             // Generate unique sync process ID
-            $syncProcessId = uniqid('sync_dosen_' . $institusi->id . '_', true);
+            $syncProcessId = uniqid('sync_dosen_'.$institusi->id.'_', true);
 
             // Dispatch job untuk sync dosen dengan sync process ID (pass institusi ID, not model)
             $job = new SyncDosenJob($institusi->id, $syncProcessId);
@@ -284,8 +284,8 @@ class SyncController extends Controller
                 ],
                 'info' => 'Job akan memproses data dosen dari API Feeder dan menyimpannya ke database. Gunakan sync_process_id untuk monitoring progress via WebSocket.',
                 'websocket_channels' => [
-                    'private-sync-process.' . $syncProcessId,
-                    'private-institusi-sync.' . $institusi->id,
+                    'private-sync-process.'.$syncProcessId,
+                    'private-institusi-sync.'.$institusi->id,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -338,7 +338,7 @@ class SyncController extends Controller
             $fetchBiodata = $validated['fetch_biodata'] ?? false;
 
             // Generate unique sync process ID
-            $syncProcessId = uniqid('sync_mahasiswa_' . $institusi->id . '_', true);
+            $syncProcessId = uniqid('sync_mahasiswa_'.$institusi->id.'_', true);
 
             // Dispatch job untuk sync mahasiswa (pass institusi ID, not model)
             $job = new SyncMahasiswaJob($institusi->id, $syncProcessId, $angkatan, $fetchBiodata);
@@ -373,8 +373,8 @@ class SyncController extends Controller
                 ],
                 'info' => $responseInfo,
                 'websocket_channels' => [
-                    'private-sync-process.' . $syncProcessId,
-                    'private-institusi-sync.' . $institusi->id,
+                    'private-sync-process.'.$syncProcessId,
+                    'private-institusi-sync.'.$institusi->id,
                 ],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -429,7 +429,7 @@ class SyncController extends Controller
             $semester = $validated['semester'] ?? null;
 
             // Generate unique sync process ID
-            $syncProcessId = uniqid('sync_akademik_mahasiswa_' . $institusi->id . '_', true);
+            $syncProcessId = uniqid('sync_akademik_mahasiswa_'.$institusi->id.'_', true);
 
             // Dispatch job untuk sync akademik mahasiswa (pass institusiId, not model)
             SyncAkademikMahasiswaJob::dispatch($institusi->id, $syncProcessId, $semester);
@@ -742,7 +742,7 @@ class SyncController extends Controller
 
             // Validasi parameter
             $validated = $request->validate([
-                'tahun_prestasi' => 'nullable|integer|min:2000|max:' . (date('Y') + 5),
+                'tahun_prestasi' => 'nullable|integer|min:2000|max:'.(date('Y') + 5),
                 'batch_size' => 'nullable|integer|min:1|max:1000',
                 'max_records' => 'nullable|integer|min:0',
                 'start_offset' => 'nullable|integer|min:0',
@@ -811,10 +811,11 @@ class SyncController extends Controller
             $semesterEnd = $validated['semester_end'] ?? null;
 
             // Dispatch job untuk sync aktivitas mahasiswa
+            // Note: Job hanya support 1 semester filter, gunakan semester_start
             SyncAktivitasMahasiswaJob::dispatch(
-                $institusi,
-                $semesterStart,
-                $semesterEnd
+                $institusi->id,  // int $institusiId
+                '',              // string $syncProcessId (auto-generated in constructor)
+                $semesterStart   // ?string $semester (filter semester)
             );
 
             return response()->json([
@@ -825,10 +826,9 @@ class SyncController extends Controller
                     'nama' => $institusi->nama,
                 ],
                 'parameters' => [
-                    'semester_start' => $semesterStart,
-                    'semester_end' => $semesterEnd,
+                    'semester' => $semesterStart,
                 ],
-                'info' => 'Job akan memproses data aktivitas mahasiswa (termasuk MBKM) dari Feeder',
+                'info' => 'Job akan memproses data aktivitas mahasiswa (termasuk MBKM) dari Feeder untuk semester: '.($semesterStart ?? 'semua'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
